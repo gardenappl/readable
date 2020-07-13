@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-const Readability = require('readability');
-const JSDOM = require('jsdom').JSDOM;
-const parseArgs = require('minimist');
-const fs = require('fs');
+const Readability = require("readability");
+const JSDOM = require("jsdom").JSDOM;
+const parseArgs = require("minimist");
+const fs = require("fs");
 
 
 const ExitCodes = {
@@ -45,12 +45,12 @@ The --properties option accepts a comma-separated list of values (with no spaces
 	text-content   Outputs the article's main content as plain text.
 
 Text-content and Html-content are mutually exclusive, and are always printed last.
-Default value is "html-title,html-content"`); 
+Default value is "html-title,html-content".`); 
 }
 
 
 
-const stringArgParams = ['_', '--', "output", "properties"];
+const stringArgParams = ['_', "--", "output", "properties"];
 const boolArgParams = ["help", "version"];
 const alias = {
 	"output": 'o',
