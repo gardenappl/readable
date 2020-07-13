@@ -224,10 +224,7 @@ function onLoadDOM(dom) {
 		writeStream.write(`Direction: ${article.dir}\n`);
 	}
 	if (wantedProperties.includes(Properties.htmlTitle)) {
-		const encodedTitle = he.encode(article.title, {
-			useNamedReferences: true
-		});
-		writeStream.write(`<h1>${encodedTitle}</h1>\n`);
+		writeStream.write(`<h1>${he.escape(article.title)}</h1>\n`);
 	}
 	if (wantedProperties.includes(Properties.htmlContent)) {
 		writeStream.write(article.content);
