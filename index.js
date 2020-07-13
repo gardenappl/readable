@@ -54,8 +54,8 @@ for (var key of Object.keys(args)) {
 			!Object.values(alias).includes(key)) {
 		console.error(`Unknown argument: ${key}`);
 		error(ExitCodes.badUsageCLI);
-	}
-	else if (stringArgParams.includes(key) && args[key] === "") {
+
+	} else if (stringArgParams.includes(key) && args[key] === "") {
 		console.error(`Error: no value given for --${key}`);
 		error(ExitCodes.badUsageCLI);
 	}
