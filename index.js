@@ -237,11 +237,11 @@ function onLoadDOMError(error) {
 	if (error.code == "ENOENT") {
 		console.error(error.message);
 		setErrored(ExitCodes.noInput);
-	} else if (error.code ="EACCES") {
+	} else if (error.code == "EACCES") {
 		console.error(error.message);
 		setErrored(ExitCodes.noPermission);
 	} else if (error.error && error.error.code == "ENOTFOUND") {
-		console.error(`Host not found: '${error.hostname}'`);
+		console.error(`Host not found: '${error.error.hostname}'`);
 		setErrored(ExitCodes.noHost);
 	} else if (error.statusCode) {
 		console.error(`Status error: ${error.response.statusMessage}`);
