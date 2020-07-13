@@ -7,12 +7,16 @@ const fs = require('fs');
 
 
 const ExitCodes = {
-	badUsageCLI: 64
+	badUsageCLI: 64,
+	dataError: 65,
+	noInput: 66,
+	noHost: 68,
+	noPermission: 77
 };
 
 let errored = false;
 
-function error(exitCode) {
+function setErrored(exitCode) {
 	process.exitCode = exitCode;
 	errored = true;
 }
@@ -52,11 +56,11 @@ for (var key of Object.keys(args)) {
 	if (!stringArgParams.includes(key) && !boolArgParams.includes(key) &&
 			!Object.values(alias).includes(key)) {
 		console.error(`Unknown argument: ${key}`);
-		error(ExitCodes.badUsageCLI);
+		setErrored(ExitCodes.badUsageCLI);
 
 	} else if (stringArgParams.includes(key) && args[key] === "") {
 		console.error(`Error: no value given for --${key}`);
-		error(ExitCodes.badUsageCLI);
+		setErrored(ExitCodes.badUsageCLI);
 	}
 
 }
@@ -75,13 +79,13 @@ const inputCount = args['_'].length + args['--'].length;
 if (inputCount > 1) {
 	console.error("Too many input arguments");
 	printUsage();
-	error(ExitCodes.badUsageCLI);
+	setErrored(ExitCodes.badUsageCLI);
 	return;
 } else if (inputCount == 0) {
 	if (process.stdin.isTTY) {
 		console.error("No input provided");
 		printUsage();
-		error(ExitCodes.badUsageCLI);
+		setErrored(ExitCodes.badUsageCLI);
 		return;
 	} else {
 		inputArg = '-'
@@ -119,12 +123,18 @@ if (inputIsFromStdin) {
 	else if (inputFile)
 		promiseGetHTML = JSDOM.fromFile(inputFile);
 
-	promiseGetHTML.then(onLoadDOM);
+	promiseGetHTML.then(onLoadDOM)
+		.catch(onLoadDOMError);
 }
 
 function onLoadDOM(dom) {
 	let reader = new Readability(dom.window.document);
 	let article = reader.parse();
+	if (!article) {
+		console.error("Couldn't parse document");
+		setErrored(ExitCodes.dataError);
+		return;
+	}
 
 	if (outputArg) {
 		fs.writeFileSync(outputArg, article.content);
@@ -132,4 +142,22 @@ function onLoadDOM(dom) {
 		console.log(article.content);
 	}
 //	console.log(chalk.blue(article.textContent));
+}
+
+function onLoadDOMError(error) {
+	if (error.code == "ENOENT") {
+		console.error(error.message);
+		setErrored(ExitCodes.noInput);
+	} else if (error.code ="EACCES") {
+		console.error(error.message);
+		setErrored(ExitCodes.noPermission);
+	} else if (error.error && error.error.code == "ENOTFOUND") {
+		console.error(`Host not found: '${error.hostname}'`);
+		setErrored(ExitCodes.noHost);
+	} else if (error.statusCode) {
+		console.error(`Status error: ${error.response.statusMessage}`);
+		setErrored(ExitCodes.noHost);
+	} else {
+		console.error(error);
+	}
 }
