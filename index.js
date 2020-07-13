@@ -38,10 +38,10 @@ Options:
 The --properties option accepts a comma-separated list of values (with no spaces in-between). Suitable values are:
 	html-title     Outputs the article's title, wrapped in an <h1> tag.
 	title          Outputs the title in the format "Title: $TITLE".
-	excerpt        Article description, or short excerpt from the content in the format "Excerpt: $EXCERPT"
+	excerpt        Article description, or short excerpt from the content, in the format "Excerpt: $EXCERPT"
 	byline         Author metadata, in the format "Author: $AUTHOR"
 	length         Length of the article in characters, in the format "Length: $LENGTH"
-	dir            Content direction, in the format "Direction: ltr" or "Direction: rtl"
+	dir            Content direction, is either "Direction: ltr" or "Direction: rtl"
 	html-content   Outputs the article's main content as HTML.
 	text-content   Outputs the article's main content as plain text.
 
