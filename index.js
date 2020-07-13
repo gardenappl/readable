@@ -4,6 +4,7 @@ const Readability = require("readability");
 const JSDOM = require("jsdom").JSDOM;
 const parseArgs = require("minimist");
 const fs = require("fs");
+const he = require("he");
 
 
 const ExitCodes = {
@@ -216,7 +217,10 @@ function onLoadDOM(dom) {
 		writeStream.write(`Direction: ${article.dir}\n`);
 	}
 	if (wantedProperties.includes(Properties.htmlTitle)) {
-		writeStream.write(`<h1>${article.title}</h1>\n`);
+		const encodedTitle = he.encode(article.title, {
+			useNamedReferences: true
+		});
+		writeStream.write(`<h1>${encodedTitle}</h1>\n`);
 	}
 	if (wantedProperties.includes(Properties.htmlContent)) {
 		writeStream.write(article.content);

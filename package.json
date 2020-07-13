@@ -12,6 +12,7 @@
   "author": "gardenapple",
   "license": "GPL-3.0-only",
   "dependencies": {
+    "he": "^1.2.0",
     "jsdom": "^16.3.0",
     "minimist": "^1.2.5",
     "readability": "github:mozilla/readability#master"
