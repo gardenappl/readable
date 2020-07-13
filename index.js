@@ -29,22 +29,40 @@ Usage:
 	(where SOURCE is a file, an http(s) URL, or '-' for standard input)
 	
 Options:
-	    --help                Print help
-	-o  --output OUTPUT_FILE  Output to OUTPUT_FILE`);
+	    --help                            Print help
+	-o  --output OUTPUT_FILE              Output to OUTPUT_FILE
+	-p  --properties PROP1,[PROP2,...]    Output specific properties of the parsed article
+
+The --properties option accepts a comma-separated list of values (with no spaces in-between). Suitable values are:
+	html-title     Outputs the article's title, wrapped in an <h1> tag.
+	title          Outputs the title in the format "Title: $TITLE".
+	excerpt        Article description, or short excerpt from the content in the format "Excerpt: $EXCERPT"
+	byline         Author metadata, in the format "Author: $AUTHOR"
+	length         Length of the article in characters, in the format "Length: $LENGTH"
+	dir            Content direction, in the format "Direction: ltr" or "Direction: rtl"
+	html-content   Outputs the article's main content as HTML.
+	text-content   Outputs the article's main content as plain text.
+
+Text-content and Html-content are mutually exclusive, and are always printed last.
+Default value is "html-title,html-content"`); 
 }
 
 
 
-const stringArgParams = ['_', '--', "output"];
+const stringArgParams = ['_', '--', "output", "properties"];
 const boolArgParams = ["help"];
 const alias = {
 	"output": 'o',
+	"properties": 'p'
 }
 
 let args = parseArgs(process.argv.slice(2), {
-	"string": stringArgParams,
-	"boolean": boolArgParams,
-	"alias": alias,
+	string: stringArgParams,
+	boolean: boolArgParams,
+	default: {
+		"properties": "html-title,html-content"
+	},
+	alias: alias,
 	"--": true
 });
 
@@ -114,9 +132,39 @@ const outputArg = args['output'];
 
 
 
+const Properties = {
+	htmlTitle: "html-title",
+	title: "title",
+	excerpt: "excerpt",
+	byline: "byline",
+	length: "length",
+	dir: "dir",
+	htmlContent: "html-content",
+	textContent: "text-content"
+}
+let wantedProperties = [];
+
+if (args.properties) {
+	for (var property of args.properties.split(',')) {
+		if (Object.values(Properties).includes(property)) {
+			wantedProperties.push(property);
+		} else {
+			console.error(`Invalid property: ${property}`);
+			setErrored(ExitCodes.badUsageCLI);
+		}
+	}
+	if (errored) {
+		printUsage();
+		return;
+	}
+}
+
+
+
 if (inputIsFromStdin) {
 	onLoadDOM(new JSDOM(fs.readFileSync(0, 'utf-8')));
 } else {
+	console.error("Retrieving...");
 	let promiseGetHTML;
 	if (inputURL)
 		promiseGetHTML = JSDOM.fromURL(inputURL);
@@ -128,6 +176,7 @@ if (inputIsFromStdin) {
 }
 
 function onLoadDOM(dom) {
+	console.error("Parsing...");
 	let reader = new Readability(dom.window.document);
 	let article = reader.parse();
 	if (!article) {
@@ -136,12 +185,36 @@ function onLoadDOM(dom) {
 		return;
 	}
 
+	let writeStream;
 	if (outputArg) {
-		fs.writeFileSync(outputArg, article.content);
+		writeStream = fs.createWriteStream(outputArg);
 	} else {
-		console.log(article.content);
+		writeStream = process.stdout;
 	}
-//	console.log(chalk.blue(article.textContent));
+
+	if (wantedProperties.includes(Properties.title)) {
+		writeStream.write(`Title: ${article.title}\n`);
+	}
+	if (wantedProperties.includes(Properties.excerpt)) {
+		writeStream.write(`Excerpt: ${article.excerpt}\n`);
+	}
+	if (wantedProperties.includes(Properties.byline)) {
+		writeStream.write(`Author: ${article.byline}\n`);
+	}
+	if (wantedProperties.includes(Properties.length)) {
+		writeStream.write(`Length: ${article.length}\n`);
+	}
+	if (wantedProperties.includes(Properties.dir)) {
+		writeStream.write(`Direction: ${article.dir}\n`);
+	}
+	if (wantedProperties.includes(Properties.htmlTitle)) {
+		writeStream.write(`<h1>${article.title}</h1>\n`);
+	}
+	if (wantedProperties.includes(Properties.htmlContent)) {
+		writeStream.write(article.content);
+	} else if (wantedProperties.includes(Properties.textContent)) {
+		writeStream.write(article.textContent);
+	}
 }
 
 function onLoadDOMError(error) {
@@ -159,5 +232,7 @@ function onLoadDOMError(error) {
 		setErrored(ExitCodes.noHost);
 	} else {
 		console.error(error);
+		if (error.stack)
+			console.error(error.stack);
 	}
 }
