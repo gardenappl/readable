@@ -40,6 +40,7 @@ const alias = {
 
 let args = parseArgs(process.argv.slice(2), {
 	"string": stringArgParams,
+	"boolean": boolArgParams,
 	"alias": alias,
 	"--": true
 });
@@ -55,7 +56,7 @@ for (var key of Object.keys(args)) {
 		error(ExitCodes.badUsageCLI);
 	}
 	else if (stringArgParams.includes(key) && args[key] === "") {
-		printUsage();
+		console.error(`Error: no value given for --${key}`);
 		error(ExitCodes.badUsageCLI);
 	}
 
