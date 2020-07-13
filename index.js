@@ -20,12 +20,12 @@ function error(exitCode) {
 function printUsage() {
 	console.error(`
 Usage:
-	readable SOURCE [options]
-	readable [options] -- SOURCE
+	readable [SOURCE] [options]
+	readable [options] -- [SOURCE]
 	(where SOURCE is a file, an http(s) URL, or '-' for standard input)
 	
 Options:
-	-h  --help                Print help
+	    --help                Print help
 	-o  --output OUTPUT_FILE  Output to OUTPUT_FILE`);
 }
 
@@ -35,7 +35,6 @@ const stringArgParams = ['_', '--', "output"];
 const boolArgParams = ["help"];
 const alias = {
 	"output": 'o',
-	"help": 'h'
 }
 
 let args = parseArgs(process.argv.slice(2), {
@@ -71,6 +70,7 @@ if (args.help) {
 	return;
 }
 
+let inputArg;
 const inputCount = args['_'].length + args['--'].length;
 if (inputCount > 1) {
 	console.error("Too many input arguments");
@@ -78,10 +78,16 @@ if (inputCount > 1) {
 	error(ExitCodes.badUsageCLI);
 	return;
 } else if (inputCount == 0) {
-	console.error("No input argument given. Use 'readable -' to read standard input");
-	printUsage();
-	error(ExitCodes.badUsageCLI);
-	return;
+	if (process.stdin.isTTY) {
+		console.error("No input provided");
+		printUsage();
+		error(ExitCodes.badUsageCLI);
+		return;
+	} else {
+		inputArg = '-'
+	}
+} else {
+	inputArg = (args['_'].length > 0) ? args['_'][0] : args['--'][0];
 }
 
 //Get input parameter, remove inputArg from args
@@ -89,11 +95,9 @@ let inputFile;
 let inputURL;
 let inputIsFromStdin = false;
 
-const inputArg = (args['_'].length > 0) ? args['_'][0] : args['--'][0];
-
 if (inputArg.startsWith("https://") || inputArg.startsWith("http://"))
 	inputURL = inputArg;
-else if (args['_'] == '-')
+else if (inputArg == '-')
 	inputIsFromStdin = true;
 else
 	inputFile = inputArg;
