@@ -35,6 +35,7 @@ Options:
 	-p  --properties PROP1,[PROP2,...]    Output specific properties of the parsed article
 	-V  --version                         Print version
 	-u  --url                             Interpret SOURCE as a URL
+	-q  --quiet                           Don't output extra information to stderr
 
 The --properties option accepts a comma-separated list of values (with no spaces in-between). Suitable values are:
 	html-title     Outputs the article's title, wrapped in an <h1> tag.
@@ -53,19 +54,21 @@ Default value is "html-title,html-content".`);
 
 
 const stringArgParams = ['_', "--", "output", "properties"];
-const boolArgParams = ["help", "version", "url"];
+const boolArgParams = ["quiet", "help", "version", "url"];
 const alias = {
 	"output": 'o',
 	"properties": 'p',
 	"version": 'V',
-	"url": 'u'
+	"url": 'u',
+	"quiet": 'q'
 }
 
 let args = parseArgs(process.argv.slice(2), {
 	string: stringArgParams,
 	boolean: boolArgParams,
 	default: {
-		"properties": "html-title,html-content"
+		"properties": "html-title,html-content",
+		"quiet": false
 	},
 	alias: alias,
 	"--": true
@@ -175,7 +178,8 @@ if (args.properties) {
 if (inputIsFromStdin) {
 	onLoadDOM(new JSDOM(fs.readFileSync(0, 'utf-8')));
 } else {
-	console.error("Retrieving...");
+	if (!args["quiet"])
+		console.error("Retrieving...");
 	let promiseGetHTML;
 	if (inputURL)
 		promiseGetHTML = JSDOM.fromURL(inputURL);
@@ -187,7 +191,8 @@ if (inputIsFromStdin) {
 }
 
 function onLoadDOM(dom) {
-	console.error("Parsing...");
+	if (!args["quiet"])
+		console.error("Parsing...");
 	let reader = new Readability(dom.window.document);
 	let article = reader.parse();
 	if (!article) {
