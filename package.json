@@ -1,0 +1,20 @@
+{
+  "name": "readable-cli",
+  "version": "1.0.0",
+  "description": "Firefox Reader Mode in your terminal - get useful text from a web page using Mozilla's Readability library",
+  "main": "index.js",
+  "bin": {
+    "readable": "./index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "gardenapple",
+  "license": "GPL-3.0-only",
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "jsdom": "^16.3.0",
+    "minimist": "^1.2.5",
+    "readability": "github:mozilla/readability#master"
+  }
+}
