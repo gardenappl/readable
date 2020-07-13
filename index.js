@@ -34,6 +34,7 @@ Options:
 	-o  --output OUTPUT_FILE              Output to OUTPUT_FILE
 	-p  --properties PROP1,[PROP2,...]    Output specific properties of the parsed article
 	-V  --version                         Print version
+	-u  --url                             Interpret SOURCE as a URL
 
 The --properties option accepts a comma-separated list of values (with no spaces in-between). Suitable values are:
 	html-title     Outputs the article's title, wrapped in an <h1> tag.
@@ -52,11 +53,12 @@ Default value is "html-title,html-content".`);
 
 
 const stringArgParams = ['_', "--", "output", "properties"];
-const boolArgParams = ["help", "version"];
+const boolArgParams = ["help", "version", "url"];
 const alias = {
 	"output": 'o',
 	"properties": 'p',
-	"version": 'V'
+	"version": 'V',
+	"url": 'u'
 }
 
 let args = parseArgs(process.argv.slice(2), {
@@ -126,7 +128,7 @@ let inputFile;
 let inputURL;
 let inputIsFromStdin = false;
 
-if (inputArg.startsWith("https://") || inputArg.startsWith("http://"))
+if (args["url"] || inputArg.startsWith("https://") || inputArg.startsWith("http://"))
 	inputURL = inputArg;
 else if (inputArg == '-')
 	inputIsFromStdin = true;
