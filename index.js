@@ -32,6 +32,7 @@ Options:
 	    --help                            Print help
 	-o  --output OUTPUT_FILE              Output to OUTPUT_FILE
 	-p  --properties PROP1,[PROP2,...]    Output specific properties of the parsed article
+	-V  --version                         Print version
 
 The --properties option accepts a comma-separated list of values (with no spaces in-between). Suitable values are:
 	html-title     Outputs the article's title, wrapped in an <h1> tag.
@@ -50,10 +51,11 @@ Default value is "html-title,html-content"`);
 
 
 const stringArgParams = ['_', '--', "output", "properties"];
-const boolArgParams = ["help"];
+const boolArgParams = ["help", "version"];
 const alias = {
 	"output": 'o',
-	"properties": 'p'
+	"properties": 'p',
+	"version": 'V'
 }
 
 let args = parseArgs(process.argv.slice(2), {
@@ -90,7 +92,13 @@ if (errored) {
 if (args.help) {
 	printUsage();
 	return;
+} else if (args.version) {
+	console.log(`readability-cli v${require("./package.json").version}`);
+	console.log(`Node.js ${process.version}`);
+	return;
 }
+
+
 
 let inputArg;
 const inputCount = args['_'].length + args['--'].length;
