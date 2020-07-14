@@ -40,12 +40,20 @@ See `readable --help` for more information.
 
 `readable index.html`
 
+**Fetch a random Wikipedia article, get its title and an excerpt:**
+
+`readable https://en.wikipedia.org/wiki/Special:Random -p title,excerpt`
+
 **Fetch a web page and read it in W3M:**
 
-`readable https://example.com/page | w3m -T text/html`
+`readable https://www.nytimes.com/2020/01/18/technology/clearview-privacy-facial-recognition.html | w3m -T text/html`
 
-**Download a web page using cURL, get the title, the content, and an excerpt in plain text:**
+**Download a web page using [cURL](https://en.wikipedia.org/wiki/CURL), parse it and save it into a file:**
 
-`curl https://example.com/page | readable --url=https://example.com/page -p title,excerpt,text-content`
+`curl https://github.com/mozilla/readability | readable --url=https://github.com/mozilla/readability`
 
 It's a good idea to supply the --url parameter when piping input, otherwise `readable` won't know the document's URL, and things like relative links won't work.
+
+### Why Node.js? It's so slow!
+
+I know that it's slow, but JavaScript is the most sensible option for this, since Mozilla's Readabilty library is written in JavaScript. [There have been ports of the Readability algorithm to other languages](https://github.com/masukomi/arc90-readability), but Mozilla's version is the only one that's actively maintained as of 2020.
