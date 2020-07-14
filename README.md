@@ -18,11 +18,10 @@
 
 #### Standard view
 
-![An article from The Guardian in W3M](https://i.imgur.com/kAeCfh1.png "Standard view in W3M")
+![An article from The Guardian in W3M](https://i.imgur.com/yRQ2ryz.png "Standard view in W3M")
 
 #### reader-view-cli
-
-![An article from The Guardian in W3M using reader-view-cli](https://i.imgur.com/KaSY1JS.png "reader-view-cli with W3M")
+![An article from The Guardian in W3M using reader-view-cli](https://i.imgur.com/Es9QNpI.png "reader-view-cli with W3M")
 
 ## Usage
 
