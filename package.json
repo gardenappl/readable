@@ -13,7 +13,12 @@
   "author": "gardenapple <gardenapple@posteo.net>",
   "bugs": "https://gitlab.com/gardenappl/reader-view-cli/-/issues",
   "keywords": [
-	  "console", "terminal", "cli", "readability", "html", "readability-cli"
+    "console",
+    "terminal",
+    "cli",
+    "readability",
+    "html",
+    "readability-cli"
   ],
   "license": "GPL-3.0-only",
   "dependencies": {
