@@ -1,8 +1,8 @@
-# reader-view-cli
+# readability-cli
 
 ### Firefox Reader View in your terminal!
 
-**reader-view-cli** takes any HTML page and strips out unnecessary bloat by using [Mozilla's Readability library](https://github.com/mozilla/readability). As a result, you get a web page which contains only the core content and nothing more. The resulting HTML is suitable for terminal browsers, text readers, and other uses.
+**readability-cli** takes any HTML page and strips out unnecessary bloat by using [Mozilla's Readability library](https://github.com/mozilla/readability). As a result, you get a web page which contains only the core content and nothing more. The resulting HTML is suitable for terminal browsers, text readers, and other uses.
 
 Here is a before-and-after comparison, using [an article from The Guardian](https://www.theguardian.com/technology/2018/jul/23/tech-industry-wealth-futurism-transhumanism-singularity) as a test subject.
 
@@ -12,8 +12,8 @@ Here is a before-and-after comparison, using [an article from The Guardian](http
 
 *So much useless stuff that the main article does not even fit on the screen!*
 
-#### reader-view-cli + W3M
-![An article from The Guardian in W3M using reader-view-cli](https://i.imgur.com/Es9QNpI.png "reader-view-cli with W3M")
+#### readability-cli + W3M
+![An article from The Guardian in W3M using readability-cli](https://i.imgur.com/Es9QNpI.png "readability-cli with W3M")
 
 *Ah, much better.*
 

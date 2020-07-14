@@ -1,6 +1,6 @@
 {
-  "name": "reader-view-cli",
-  "version": "0.0.1",
+  "name": "@gardenapple/readability-cli",
+  "version": "1.0.0",
   "description": "Firefox Reader Mode in your terminal - get useful text from a web page using Mozilla's Readability library",
   "main": "index.js",
   "bin": {
@@ -9,16 +9,15 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": "gitlab:gardenappl/reader-view-cli",
+  "repository": "gitlab:gardenappl/readability-cli",
   "author": "gardenapple <gardenapple@posteo.net>",
-  "bugs": "https://gitlab.com/gardenappl/reader-view-cli/-/issues",
+  "bugs": "https://gitlab.com/gardenappl/readability-cli/-/issues",
   "keywords": [
     "console",
     "terminal",
     "cli",
     "readability",
-    "html",
-    "readability-cli"
+    "html"
   ],
   "license": "GPL-3.0-only",
   "dependencies": {
