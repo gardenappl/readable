@@ -146,7 +146,6 @@ delete args['--'];
 
 const outputArg = args['output'];
 const documentURL = args["url"] || inputURL;
-console.error(`Document URL: ${documentURL}`);
 
 
 const Properties = {
@@ -187,21 +186,25 @@ if (inputIsFromStdin) {
 		console.error("Retrieving...");
 	let promiseGetHTML;
 	if (inputURL) {
-		promiseGetHTML = JSDOM.fromURL(inputURL);
+		promiseGetHTML = JSDOM.fromURL(inputURL).catch(error => {
+			if (error instanceof TypeError) {
+				console.error(`Invalid URL: ${inputURL}`);
+				setErrored(ExitCodes.dataError);
+			}
+
+			return Promise.reject();
+		});
 	} else if (inputFile) {
 		promiseGetHTML = JSDOM.fromFile(inputFile, {
 			url: documentURL
 		});
 	}
 
-	promiseGetHTML.then(onLoadDOM)
-		.catch(onLoadDOMError);
+	promiseGetHTML.then(onLoadDOM, onLoadDOMError)
 }
 
 function onLoadDOM(dom) {
 	const document = dom.window.document
-	console.log(`Base URI: ${document.baseURI}`);
-	console.log(`Document URI: ${document.documentURI}`);
 	if (!args["quiet"])
 		console.error("Parsing...");
 	let reader = new Readability(document);
@@ -245,6 +248,10 @@ function onLoadDOM(dom) {
 }
 
 function onLoadDOMError(error) {
+	//resolved earlier
+	if (!error) 
+		return;
+
 	if (error.code == "ENOENT") {
 		console.error(error.message);
 		setErrored(ExitCodes.noInput);
