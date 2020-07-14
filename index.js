@@ -30,12 +30,13 @@ Usage:
 	(where SOURCE is a file, an http(s) URL, or '-' for standard input)
 	
 Options:
-	    --help                            Print help
-	-o  --output OUTPUT_FILE              Output to OUTPUT_FILE
-	-p  --properties PROP1,[PROP2,...]    Output specific properties of the parsed article
-	-V  --version                         Print version
-	-u  --url                             Interpret SOURCE as a URL
-	-q  --quiet                           Don't output extra information to stderr
+	    --help                 Print help
+	-o  --output OUTPUT_FILE   Output to OUTPUT_FILE
+	-p  --properties PROPS...  Output specific properties of the parsed article
+	-V  --version              Print version
+	-u  --url                  Set the document URL when parsing standard input or a local file (this affects relative links and such)
+	-U  --is-url               Interpret SOURCE as a URL rather than file name
+	-q  --quiet                Don't output extra information to stderr
 
 The --properties option accepts a comma-separated list of values (with no spaces in-between). Suitable values are:
 	html-title     Outputs the article's title, wrapped in an <h1> tag.
@@ -53,13 +54,14 @@ Default value is "html-title,html-content".`);
 
 
 
-const stringArgParams = ['_', "--", "output", "properties"];
-const boolArgParams = ["quiet", "help", "version", "url"];
+const stringArgParams = ['_', "--", "output", "properties", "url"];
+const boolArgParams = ["quiet", "help", "version", "is-url"];
 const alias = {
 	"output": 'o',
 	"properties": 'p',
 	"version": 'V',
 	"url": 'u',
+	"is-url": 'U',
 	"quiet": 'q'
 }
 
@@ -131,7 +133,7 @@ let inputFile;
 let inputURL;
 let inputIsFromStdin = false;
 
-if (args["url"] || inputArg.startsWith("https://") || inputArg.startsWith("http://"))
+if (args["is-url"] || inputArg.startsWith("https://") || inputArg.startsWith("http://"))
 	inputURL = inputArg;
 else if (inputArg == '-')
 	inputIsFromStdin = true;
@@ -143,7 +145,8 @@ delete args['--'];
 
 
 const outputArg = args['output'];
-
+const documentURL = args["url"] || inputURL;
+console.error(`Document URL: ${documentURL}`);
 
 
 const Properties = {
@@ -176,24 +179,32 @@ if (args.properties) {
 
 
 if (inputIsFromStdin) {
-	onLoadDOM(new JSDOM(fs.readFileSync(0, 'utf-8')));
+	onLoadDOM(new JSDOM(fs.readFileSync(0, 'utf-8')), {
+		url: documentURL
+	});
 } else {
 	if (!args["quiet"])
 		console.error("Retrieving...");
 	let promiseGetHTML;
-	if (inputURL)
+	if (inputURL) {
 		promiseGetHTML = JSDOM.fromURL(inputURL);
-	else if (inputFile)
-		promiseGetHTML = JSDOM.fromFile(inputFile);
+	} else if (inputFile) {
+		promiseGetHTML = JSDOM.fromFile(inputFile, {
+			url: documentURL
+		});
+	}
 
 	promiseGetHTML.then(onLoadDOM)
 		.catch(onLoadDOMError);
 }
 
 function onLoadDOM(dom) {
+	const document = dom.window.document
+	console.log(`Base URI: ${document.baseURI}`);
+	console.log(`Document URI: ${document.documentURI}`);
 	if (!args["quiet"])
 		console.error("Parsing...");
-	let reader = new Readability(dom.window.document);
+	let reader = new Readability(document);
 	let article = reader.parse();
 	if (!article) {
 		console.error("Couldn't parse document");

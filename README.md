@@ -32,12 +32,13 @@
 	
 Options:
 ```
-	    --help                            Print help
-	-o  --output OUTPUT_FILE              Output to OUTPUT_FILE
-	-p  --properties PROP1,[PROP2,...]    Output specific properties of the parsed article
-	-V  --version                         Print version
-	-u  --url                             Interpret SOURCE as a URL
-	-q  --quiet                           Don't output extra information to stderr
+	    --help                 Print help
+	-o  --output OUTPUT_FILE   Output to OUTPUT_FILE
+	-p  --properties PROPS...  Output specific properties of the parsed article
+	-V  --version              Print version
+	-u  --url                  Set the document URL when parsing standard input or a local file (this affects relative links and such)
+	-U  --is-url               Interpret SOURCE as a URL rather than file name
+	-q  --quiet                Don't output extra information to stderr
 ```
 
 The --properties option accepts a comma-separated list of values (with no spaces in-between). Suitable values are:
@@ -62,7 +63,9 @@ Default value is "html-title,html-content".
 `readable index.html`
 
 **Fetch a web page and read it in W3M:**
-`readable https://www.wikipedia.org/ | w3m -T text/html`
+`readable https://example.com/page | w3m -T text/html`
 
 **Download a web page using cURL, get the title, the content, and an excerpt in plain text:**
-`curl https://example.com/page | readable -p title,excerpt,text-content`
+`curl https://example.com/page | readable --url https://example.com/page -p title,excerpt,text-content`
+
+It's a good idea to supply the --url parameter when piping input, otherwise `readable` won't know the document's URL, and things like relative links won't work.
