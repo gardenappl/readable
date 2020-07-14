@@ -50,7 +50,7 @@ See `readable --help` for more information.
 
 **Download a web page using [cURL](https://en.wikipedia.org/wiki/CURL), parse it and save it into a file:**
 
-`curl https://github.com/mozilla/readability | readable --url=https://github.com/mozilla/readability`
+`curl https://github.com/mozilla/readability | readable --url=https://github.com/mozilla/readability > example.html`
 
 It's a good idea to supply the --url parameter when piping input, otherwise `readable` won't know the document's URL, and things like relative links won't work.
 
