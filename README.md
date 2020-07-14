@@ -17,6 +17,12 @@ Here is a before-and-after comparison, using [an article from The Guardian](http
 
 *Ah, much better.*
 
+## Installation
+
+The best way to install **readability-cli** is through NPM:
+
+`npm install -g @gardenapple/readability-cli`
+
 ## Usage
 
 `readable [SOURCE] [options]`
