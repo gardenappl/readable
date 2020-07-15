@@ -1,26 +1,28 @@
 #!/usr/bin/env node
 
 /*
-	Firefox Reader Mode in your terminal! - CLI tool for Mozilla's Readability library
-        Copyright (C) 2020 gardenapple
+
+Firefox Reader Mode in your terminal! CLI tool for Mozilla's Readability library
+
+	Copyright (C) 2020 gardenapple
                                                                                                     
-        This program is free software: you can redistribute it and/or modify
-        it under the terms of the GNU General Public License as published by
-        the Free Software Foundation, either version 3 of the License, or
-        (at your option) any later version.
-                                                                                                    
-        This program is distributed in the hope that it will be useful,
-        but WITHOUT ANY WARRANTY; without even the implied warranty of
-        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-        GNU General Public License for more details.
-                                                                                                    
-        You should have received a copy of the GNU General Public License
-        along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+                                                                                            	
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+                                                                                            	
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-const Readability = require("readability");
 const JSDOM = require("jsdom").JSDOM;
 const parseArgs = require("minimist");
-
+//fs, Readability, and Readability-readerable are loaded on-demand.
+//To-do: lazy loading?
 
 const ExitCodes = {
 	badUsageCLI: 64,
@@ -49,9 +51,19 @@ Options:
 	-o  --output OUTPUT_FILE   Output to OUTPUT_FILE
 	-p  --properties PROPS...  Output specific properties of the parsed article
 	-V  --version              Print version
-	-u  --url                  Set the document URL when parsing standard input or a local file (this affects relative links and such)
+	-u  --url                  Set the document URL when parsing standard input or a local file (this affects relative links)
 	-U  --is-url               Interpret SOURCE as a URL rather than file name
 	-q  --quiet                Don't output extra information to stderr
+	-l  --low-confidence MODE  What to do if Readability.js is uncertain about what the core content actually is
+
+
+The --low-confidence option determines what should be done for documents where readability-cli can't determine what the core content is.
+	no-op   When unsure, don't touch the HTML, output as-is. If the --properties option is used, this will make the program crash.
+	force   Filter the HTML even when unsure (may produce really bad output).
+	exit    When unsure, exit with an error.
+
+Default value is "no-op".
+
 
 The --properties option accepts a comma-separated list of values (with no spaces in-between). Suitable values are:
 	html-title     Outputs the article's title, wrapped in an <h1> tag.
@@ -69,7 +81,7 @@ Default value is "html-title,html-content".`);
 
 
 
-const stringArgParams = ['_', "--", "output", "properties", "url"];
+const stringArgParams = ['_', "--", "low-confidence", "output", "properties", "url"];
 const boolArgParams = ["quiet", "help", "version", "is-url"];
 const alias = {
 	"output": 'o',
@@ -77,14 +89,15 @@ const alias = {
 	"version": 'V',
 	"url": 'u',
 	"is-url": 'U',
-	"quiet": 'q'
+	"quiet": 'q',
+	"low-confidence": 'l'
 }
 
 let args = parseArgs(process.argv.slice(2), {
 	string: stringArgParams,
 	boolean: boolArgParams,
 	default: {
-		"properties": "html-title,html-content",
+		"low-confidence": "no-op",
 		"quiet": false
 	},
 	alias: alias,
@@ -112,7 +125,7 @@ if (errored) {
 	return;
 }
 
-if (args.help) {
+if (args["help"]) {
 	printUsage();
 	return;
 } else if (args.version) {
@@ -163,6 +176,7 @@ const outputArg = args['output'];
 const documentURL = args["url"] || inputURL;
 
 
+
 const Properties = {
 	htmlTitle: "html-title",
 	title: "title",
@@ -172,11 +186,12 @@ const Properties = {
 	dir: "dir",
 	htmlContent: "html-content",
 	textContent: "text-content"
-}
+};
 let wantedProperties = [];
+let justOutputHtml = false;
 
-if (args.properties) {
-	for (var property of args.properties.split(',')) {
+if (args["properties"]) {
+	for (var property of args["properties"].split(',')) {
 		if (Object.values(Properties).includes(property)) {
 			wantedProperties.push(property);
 		} else {
@@ -184,10 +199,28 @@ if (args.properties) {
 			setErrored(ExitCodes.badUsageCLI);
 		}
 	}
-	if (errored) {
-		printUsage();
-		return;
-	}
+} else {
+	wantedProperties = [ Properties.htmlTitle, Properties.htmlContent ];
+	justOutputHtml = true;
+}
+
+
+
+const LowConfidenceMode = {
+	noOp: "no-op",
+	force: "force",
+	exit: "exit"
+};
+if (!Object.values(LowConfidenceMode).includes(args["low-confidence"])) {
+	console.error(`Invalid mode: ${args["low-confidence"]}`);
+	setErrored(ExitCodes.badUsageCLI);
+}
+
+
+
+if (errored) {
+	printUsage();
+	return;
 }
 
 async function read(stream) {
@@ -240,14 +273,30 @@ function escapeHTML(string, document){
 
 function onLoadDOM(dom) {
 	const document = dom.window.document;
-	if (!args["quiet"])
-		console.error("Parsing...");
-	let reader = new Readability(document);
-	let article = reader.parse();
-	if (!article) {
-		console.error("Couldn't parse document");
-		setErrored(ExitCodes.dataError);
-		return;
+
+	let shouldParseArticle = true;
+
+	if (args["low-confidence"] != LowConfidenceMode.force) {
+		const Readerable = require("readability/Readability-readerable");
+
+		shouldParseArticle = Readerable.isProbablyReaderable(document);		
+	}
+
+	if (!shouldParseArticle) {
+		if (args["low-confidence"] == LowConfidenceMode.exit) {
+			console.error("Not sure if this document should be parsed, exiting");
+			setErrored(ExitCodes.dataError);
+			return;
+		} else {
+			if (!args["quiet"])
+				console.error("Not sure if this document should be parsed. Not parsing");
+			if (!justOutputHtml) {
+				console.error("Can't output properties");
+				setErrored(ExitCodes.dataError);
+				return;
+			}
+			shouldParseArticle = false;
+		}
 	}
 
 	let writeStream;
@@ -258,28 +307,47 @@ function onLoadDOM(dom) {
 		writeStream = process.stdout;
 	}
 
-	if (wantedProperties.includes(Properties.title)) {
-		writeStream.write(`Title: ${article.title}\n`);
-	}
-	if (wantedProperties.includes(Properties.excerpt)) {
-		writeStream.write(`Excerpt: ${article.excerpt}\n`);
-	}
-	if (wantedProperties.includes(Properties.byline)) {
-		writeStream.write(`Author: ${article.byline}\n`);
-	}
-	if (wantedProperties.includes(Properties.length)) {
-		writeStream.write(`Length: ${article.length}\n`);
-	}
-	if (wantedProperties.includes(Properties.dir)) {
-		writeStream.write(`Direction: ${article.dir}\n`);
-	}
-	if (wantedProperties.includes(Properties.htmlTitle)) {
-		writeStream.write(`<h1>${escapeHTML(article.title, document)}</h1>\n`);
-	}
-	if (wantedProperties.includes(Properties.htmlContent)) {
-		writeStream.write(article.content);
-	} else if (wantedProperties.includes(Properties.textContent)) {
-		writeStream.write(article.textContent);
+
+	if (shouldParseArticle) {
+		const Readability = require("readability");
+
+		if (!args["quiet"])
+			console.error("Parsing...");
+
+		const reader = new Readability(document);
+		const article = reader.parse();
+		if (!article) {
+			console.error("Couldn't parse document. This error usually means that the input document is empty.");
+			setErrored(ExitCodes.dataError);
+			return;
+		}
+
+		if (wantedProperties.includes(Properties.title)) {
+			writeStream.write(`Title: ${article.title}\n`);
+		}
+		if (wantedProperties.includes(Properties.excerpt)) {
+			writeStream.write(`Excerpt: ${article.excerpt}\n`);
+		}
+		if (wantedProperties.includes(Properties.byline)) {
+			writeStream.write(`Author: ${article.byline}\n`);
+		}
+		if (wantedProperties.includes(Properties.length)) {
+			writeStream.write(`Length: ${article.length}\n`);
+		}
+		if (wantedProperties.includes(Properties.dir)) {
+			writeStream.write(`Direction: ${article.dir}\n`);
+		}
+		if (wantedProperties.includes(Properties.htmlTitle)) {
+			writeStream.write(`<h1>${escapeHTML(article.title, document)}</h1>\n`);
+		}
+		if (wantedProperties.includes(Properties.htmlContent)) {
+			writeStream.write(article.content);
+		} else if (wantedProperties.includes(Properties.textContent)) {
+			writeStream.write(article.textContent);
+		}
+	} else {
+		//Ignore wantedProperties, that should've thrown an error before
+		writeStream.write(document.documentElement.outerHTML);
 	}
 }
 
