@@ -1,6 +1,6 @@
 {
   "name": "@gardenapple/readability-cli",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Firefox Reader Mode in your terminal - get useful text from a web page using Mozilla's Readability library",
   "main": "index.js",
   "bin": {

@@ -19,9 +19,8 @@ Firefox Reader Mode in your terminal! CLI tool for Mozilla's Readability library
 	You should have received a copy of the GNU General Public License
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-const JSDOM = require("jsdom").JSDOM;
 const parseArgs = require("minimist");
-//fs, Readability, and Readability-readerable are loaded on-demand.
+//JSDOM, fs, Readability, and Readability-readerable are loaded on-demand.
 //To-do: lazy loading?
 
 const ExitCodes = {
@@ -231,6 +230,7 @@ async function read(stream) {
 	return Buffer.concat(chunks).toString('utf8');
 }
 
+
 if (inputIsFromStdin) {
 	if (!args["quiet"]) {
 		console.error("Reading...");
@@ -240,9 +240,11 @@ if (inputIsFromStdin) {
 				"be broken. Supply the --url parameter to fix.")
 	}
 	read(process.stdin).then(result => {
+		const JSDOM = require("jsdom").JSDOM;
 		onLoadDOM(new JSDOM(result, { url: documentURL }));
 	});
 } else {
+	const JSDOM = require("jsdom").JSDOM;
 	if (!args["quiet"])
 		console.error("Retrieving...");
 	let promiseGetHTML;
@@ -284,12 +286,12 @@ function onLoadDOM(dom) {
 
 	if (!shouldParseArticle) {
 		if (args["low-confidence"] == LowConfidenceMode.exit) {
-			console.error("Not sure if this document should be parsed, exiting");
+			console.error("Not sure if this document should be processed, exiting");
 			setErrored(ExitCodes.dataError);
 			return;
 		} else {
 			if (!args["quiet"])
-				console.error("Not sure if this document should be parsed. Not parsing");
+				console.error("Not sure if this document should be processed. Not processing");
 			if (!justOutputHtml) {
 				console.error("Can't output properties");
 				setErrored(ExitCodes.dataError);
@@ -312,12 +314,12 @@ function onLoadDOM(dom) {
 		const Readability = require("readability");
 
 		if (!args["quiet"])
-			console.error("Parsing...");
+			console.error("Processing...");
 
 		const reader = new Readability(document);
 		const article = reader.parse();
 		if (!article) {
-			console.error("Couldn't parse document. This error usually means that the input document is empty.");
+			console.error("Couldn't process document. This error usually means that the input document is empty.");
 			setErrored(ExitCodes.dataError);
 			return;
 		}
