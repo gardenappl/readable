@@ -17,12 +17,9 @@
         You should have received a copy of the GNU General Public License
         along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 const Readability = require("readability");
 const JSDOM = require("jsdom").JSDOM;
 const parseArgs = require("minimist");
-const fs = require("fs");
-const he = require("he");
 
 
 const ExitCodes = {
@@ -193,11 +190,24 @@ if (args.properties) {
 	}
 }
 
-
+async function read(stream) {
+	const chunks = [];
+	for await (const chunk of stream){
+		chunks.push(chunk); 
+	}
+	return Buffer.concat(chunks).toString('utf8');
+}
 
 if (inputIsFromStdin) {
-	onLoadDOM(new JSDOM(fs.readFileSync(0, 'utf-8')), {
-		url: documentURL
+	if (!args["quiet"]) {
+		console.error("Reading...");
+		if (!documentURL)
+			console.error("Note: piping input with unknown " +
+				"URL. This means that relative links will " +
+				"be broken. Supply the --url parameter to fix.")
+	}
+	read(process.stdin).then(result => {
+		onLoadDOM(new JSDOM(result, { url: documentURL }));
 	});
 } else {
 	if (!args["quiet"])
@@ -221,8 +231,15 @@ if (inputIsFromStdin) {
 	promiseGetHTML.then(onLoadDOM, onLoadDOMError)
 }
 
+//Taken from https://stackoverflow.com/a/22706073/5701177
+function escapeHTML(string, document){
+    var p = document.createElement("p");
+    p.appendChild(document.createTextNode(string));
+    return p.innerHTML;
+}
+
 function onLoadDOM(dom) {
-	const document = dom.window.document
+	const document = dom.window.document;
 	if (!args["quiet"])
 		console.error("Parsing...");
 	let reader = new Readability(document);
@@ -235,6 +252,7 @@ function onLoadDOM(dom) {
 
 	let writeStream;
 	if (outputArg) {
+		const fs = require("fs");
 		writeStream = fs.createWriteStream(outputArg);
 	} else {
 		writeStream = process.stdout;
@@ -256,7 +274,7 @@ function onLoadDOM(dom) {
 		writeStream.write(`Direction: ${article.dir}\n`);
 	}
 	if (wantedProperties.includes(Properties.htmlTitle)) {
-		writeStream.write(`<h1>${he.escape(article.title)}</h1>\n`);
+		writeStream.write(`<h1>${escapeHTML(article.title, document)}</h1>\n`);
 	}
 	if (wantedProperties.includes(Properties.htmlContent)) {
 		writeStream.write(article.content);
