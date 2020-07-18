@@ -46,7 +46,7 @@ Usage:
 	(where SOURCE is a file, an http(s) URL, or '-' for standard input)
 	
 Options:
-	    --help                 Print help
+	-h  --help                 Print help
 	-o  --output OUTPUT_FILE   Output to OUTPUT_FILE
 	-p  --properties PROPS...  Output specific properties of the parsed article
 	-V  --version              Print version
@@ -56,9 +56,9 @@ Options:
 	-l  --low-confidence MODE  What to do if Readability.js is uncertain about what the core content actually is
 
 
-The --low-confidence option determines what should be done for documents where readability-cli can't determine what the core content is.
+The --low-confidence option determines what should be done for documents where Readability can't tell what the core content is:
 	no-op   When unsure, don't touch the HTML, output as-is. If the --properties option is used, this will make the program crash.
-	force   Filter the HTML even when unsure (may produce really bad output).
+	force   Process the document even when unsure (may produce really bad output).
 	exit    When unsure, exit with an error.
 
 Default value is "no-op".
@@ -89,7 +89,8 @@ const alias = {
 	"url": 'u',
 	"is-url": 'U',
 	"quiet": 'q',
-	"low-confidence": 'l'
+	"low-confidence": 'l',
+	"help": 'h'
 }
 
 let args = parseArgs(process.argv.slice(2), {
