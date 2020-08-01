@@ -19,9 +19,11 @@ Here is a before-and-after comparison, using [an article from The Guardian](http
 
 ## Installation
 
-The best way to install **readability-cli** is through NPM:
+**readability-cli** can be installed on any system with [Node.js](https://nodejs.org/en/):
 
 `npm install -g @gardenapple/readability-cli`
+
+### Arch Linux
 
 Arch Linux users may use the [readability-cli](https://aur.archlinux.org/packages/readability-cli/) AUR package instead.
 
