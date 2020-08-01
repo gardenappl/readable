@@ -23,6 +23,8 @@ The best way to install **readability-cli** is through NPM:
 
 `npm install -g @gardenapple/readability-cli`
 
+Arch Linux users may use the [readability-cli](https://aur.archlinux.org/packages/readability-cli/) AUR package instead.
+
 ## Usage
 
 `readable [SOURCE] [options]`
