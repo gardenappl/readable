@@ -22,7 +22,6 @@
   "license": "GPL-3.0-only",
   "dependencies": {
     "jsdom": "^16.3.0",
-    "minimist": "^1.2.5",
     "readability": "github:mozilla/readability#master",
     "yargs": "^15.4.1"
   }
