@@ -38,98 +38,7 @@ function setErrored(exitCode) {
 	errored = true;
 }
 
-//function printUsage() {
-//	console.error(`
-//Usage:
-//	readable [SOURCE] [options]
-//	readable [options] -- [SOURCE]
-//	(where SOURCE is a file, an http(s) URL, or '-' for standard input)
-//	
-//Options:
-//	-h  --help                 Print help
-//	-o  --output OUTPUT_FILE   Output to OUTPUT_FILE
-//	-p  --properties PROPS...  Output specific properties of the parsed article
-//	-V  --version              Print version
-//	-u  --url                  Set the document URL when parsing standard input or a local file (this affects relative links)
-//	-U  --is-url               Interpret SOURCE as a URL rather than file name
-//	-q  --quiet                Don't output extra information to stderr
-//	-l  --low-confidence MODE  What to do if Readability.js is uncertain about what the core content actually is
-//
-//
-//The --low-confidence option determines what should be done for documents where Readability can't tell what the core content is:
-//	no-op   When unsure, don't touch the HTML, output as-is. If the --properties option is used, this will make the program crash.
-//	force   Process the document even when unsure (may produce really bad output).
-//	exit    When unsure, exit with an error.
-//
-//Default value is "no-op".
-//
-//
-//The --properties option accepts a comma-separated list of values (with no spaces in-between). Suitable values are:
-//	html-title     Outputs the article's title, wrapped in an <h1> tag.
-//	title          Outputs the title in the format "Title: $TITLE".
-//	excerpt        Article description, or short excerpt from the content, in the format "Excerpt: $EXCERPT"
-//	byline         Author metadata, in the format "Author: $AUTHOR"
-//	length         Length of the article in characters, in the format "Length: $LENGTH"
-//	dir            Content direction, is either "Direction: ltr" or "Direction: rtl"
-//	html-content   Outputs the article's main content as HTML.
-//	text-content   Outputs the article's main content as plain text.
-//
-//Text-content and Html-content are mutually exclusive, and are always printed last.
-//Default value is "html-title,html-content".`); 
-//}
 
-
-
-//const stringArgParams = ['_', "--", "low-confidence", "output", "properties", "url"];
-//const boolArgParams = ["quiet", "help", "version", "is-url"];
-//const alias = {
-//	"output": 'o',
-//	"properties": 'p',
-//	"version": 'V',
-//	"url": 'u',
-//	"is-url": 'U',
-//	"quiet": 'q',
-//	"low-confidence": 'l',
-//	"help": 'h'
-//}
-//
-//let args = parseArgs(process.argv.slice(2), {
-//	string: stringArgParams,
-//	boolean: boolArgParams,
-//	default: {
-//		"low-confidence": "no-op",
-//		"quiet": false
-//	},
-//	alias: alias,
-//	"--": true
-//});
-
-
-////backwards compatibility
-//
-//let shouldSplitNext = false;
-//for (var i = 1; i < process.argv.length; i++) {
-//	const arg = process.argv[i];
-//	console.log(arg);
-//	//Turn comma-separated list into space-separated list
-//	let shouldSplit = false;
-//
-//	if (shouldSplitNext) {
-//		shouldSplitNext = false;
-//		shouldSplit = true;
-//	} else if (arg.startsWith("--properties") || /-\w*p/.test(arg)) {
-//		shouldSplitNext = true;
-//	} else if (arg.startsWith("--properties=") || /-\w*p=/.test(arg)) {
-//		shouldSplit = true;
-//	}
-//
-//	if (shouldSplit) {
-//		const split = arg.split(',');
-//		process.argv.splice(i, 1, ...split);
-//	}
-//}
-//console.log("done");
-//console.log(process.argv);
 
 
 //
@@ -203,7 +112,9 @@ let args = yargs
 	})
 	.middleware([ yargsCompatProperties, yargsFixPositional ], true) //middleware seems to be buggy
 	.option('c', {
-		alias: "completion"
+		alias: "completion",
+		type: "boolean",
+		desc: "Print script for bash/zsh completion"
 	})
 	.option('V', {
 		alias: "version",
@@ -238,6 +149,36 @@ let args = yargs
 		desc: "Don't output extra information to stderr",
 		default: false
 	})
+	.option('u', {
+		alias: "url",
+		type: "string",
+		desc: "Set the document URL when parsing standard input or a local file (this affects relative links)"
+	})
+	.option('U', {
+		alias: "is-url",
+		type: "boolean",
+		desc: "Interpret SOURCE as a URL rather than file name"
+	})
+	.epilogue(`The --low-confidence option determines what should be done for documents where Readability can't tell what the core content is:
+   no-op   When unsure, don't touch the HTML, output as-is. If the --properties option is used, this will make the program crash.
+   force   Process the document even when unsure (may produce really bad output).
+   exit    When unsure, exit with an error.
+
+Default value is "no-op".
+
+
+The --properties option accepts a comma-separated list of values (with no spaces in-between). Suitable values are:
+   html-title     Outputs the article's title, wrapped in an <h1> tag.
+   title          Outputs the title in the format "Title: $TITLE".
+   excerpt        Article description, or short excerpt from the content, in the format "Excerpt: $EXCERPT"
+   byline         Author metadata, in the format "Author: $AUTHOR"
+   length         Length of the article in characters, in the format "Length: $LENGTH"
+   dir            Content direction, is either "Direction: ltr" or "Direction: rtl"
+   html-content   Outputs the article's main content as HTML.
+   text-content   Outputs the article's main content as plain text.
+
+Text-content and Html-content are mutually exclusive, and are always printed last.
+Default value is "html-title,html-content".`) 
 	.wrap(Math.min(yargs.terminalWidth(), 100))
 	.strict()
 	//.wrap(yargs.terminalWidth())
@@ -253,33 +194,8 @@ if (args["completion"]) {
 	process.exit();
 }
 
-////Minimist's parseArgs accepts a function for handling unknown parameters,
-////but it works in a stupid way, so I'm writing my own.
-//
-//for (var key of Object.keys(args)) {
-//	if (!stringArgParams.includes(key) && !boolArgParams.includes(key) &&
-//			!Object.values(alias).includes(key)) {
-//		console.error(`Unknown argument: ${key}`);
-//		setErrored(ExitCodes.badUsageCLI);
-//
-//	} else if (stringArgParams.includes(key) && args[key] === "") {
-//		console.error(`Error: no value given for --${key}`);
-//		setErrored(ExitCodes.badUsageCLI);
-//	}
-//
-//}
-//if (errored) {
-//	printUsage();
-//	return;
-//}
 
-
-
-
-if (args["help"]) {
-	printUsage();
-	return;
-} else if (args.version) {
+if (args.version) {
 	console.log(`readability-cli v${require("./package.json").version}`);
 	console.log(`Node.js ${process.version}`);
 	return;
@@ -288,13 +204,6 @@ if (args["help"]) {
 
 
 let inputArg;
-//const inputCount = args['_'].length + args['--'].length;
-//if (inputCount > 1) {
-//	console.error("Too many input arguments");
-//	printUsage();
-//	setErrored(ExitCodes.badUsageCLI);
-//	return;
-//} else if (inputCount == 0) {
 if (!args["source"]) {
 	if (process.stdin.isTTY) {
 		console.error("No input provided");
@@ -305,7 +214,6 @@ if (!args["source"]) {
 		inputArg = '-'
 	}
 } else {
-//	inputArg = (args['_'].length > 0) ? args['_'][0] : args['--'][0];
 	inputArg = args["source"];
 }
 
@@ -320,9 +228,6 @@ else if (inputArg == '-')
 	inputIsFromStdin = true;
 else
 	inputFile = inputArg;
-
-delete args['_'];
-delete args['--'];
 
 
 const outputArg = args['output'];
