@@ -46,11 +46,12 @@ Usage:
 	(where SOURCE is a file, an http(s) URL, or '-' for standard input)
 	
 Options:
+	-b  --base URL             Set URL as the base for relative links, useful when parsing local files or standard input
 	-h  --help                 Print help
 	-o  --output OUTPUT_FILE   Output to OUTPUT_FILE
 	-p  --properties PROPS...  Output specific properties of the parsed article
 	-V  --version              Print version
-	-u  --url                  Set the document URL when parsing standard input or a local file (this affects relative links)
+	-u  --url                  (deprecated) alias for --base
 	-U  --is-url               Interpret SOURCE as a URL rather than file name
 	-q  --quiet                Don't output extra information to stderr
 	-l  --low-confidence MODE  What to do if Readability.js is uncertain about what the core content actually is
@@ -80,13 +81,14 @@ Default value is "html-title,html-content".`);
 
 
 
-const stringArgParams = ['_', "--", "low-confidence", "output", "properties", "url"];
+const stringArgParams = ['_', "--", "low-confidence", "output", "properties", "url", "base"];
 const boolArgParams = ["quiet", "help", "version", "is-url"];
 const alias = {
+	"url": 'u',
 	"output": 'o',
 	"properties": 'p',
 	"version": 'V',
-	"url": 'u',
+	"base": 'b',
 	"is-url": 'U',
 	"quiet": 'q',
 	"low-confidence": 'l',
@@ -103,6 +105,15 @@ let args = parseArgs(process.argv.slice(2), {
 	alias: alias,
 	"--": true
 });
+
+
+//Backwards compat
+if (args['u'])
+	args['b'] = args['u'];
+if (args["url"]) {
+	console.error("Note: the --url option is deprecated, use --base or -b instead");
+	args["base"] = args["url"];
+}
 
 
 //Minimist's parseArgs accepts a function for handling unknown parameters,
@@ -173,7 +184,7 @@ delete args['--'];
 
 
 const outputArg = args['output'];
-const documentURL = args["url"] || inputURL;
+const documentURL = args["base"] || inputURL;
 
 
 
@@ -238,7 +249,7 @@ if (inputIsFromStdin) {
 		if (!documentURL)
 			console.error("Note: piping input with unknown " +
 				"URL. This means that relative links will " +
-				"be broken. Supply the --url parameter to fix.")
+				"be broken. Supply the --base parameter to fix.")
 	}
 	read(process.stdin).then(result => {
 		const JSDOM = require("jsdom").JSDOM;
