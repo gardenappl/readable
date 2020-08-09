@@ -56,6 +56,12 @@ const Properties = {
 	textContent: "text-content"
 };
 
+const LowConfidenceMode = {
+	noOp: "no-op",
+	force: "force",
+	exit: "exit"
+};
+
 const yargs = require("yargs");
 
 //backwards compat with old, comma-separated values
@@ -63,7 +69,6 @@ function yargsCompatProperties(args) {
 	if (args["properties"]) {
 		for (var i = 0; i < args["properties"].length; i++) {
 			const property = args["properties"][i];
-			console.error(property);
 			if (property.indexOf(',') > -1) {
 				const split = args["properties"][i].split(',');
 				args["properties"].splice(i, 1, ...split);
@@ -99,16 +104,39 @@ function yargsFixPositional(args) {
 	}
 }
 
+
 let args = yargs
 	.version(false)
-	.parserConfiguration({
-		"camel-case-expansion": false
-	})
 	.command("* [source]", "Process HTML input", (yargs) => { 
 		yargs.positional("source", {
 			desc: "A file, an http(s) URL, or '-' for standard input",
 			type: "string"
 		});
+	})
+	.completion('completion', false, function(current, args) {
+		if (args["properties"] !== undefined) {
+			const properties = args["properties"];
+			let possibleProperties = [];
+			for (var possibleProperty of Object.values(Properties)) {
+				if (possibleProperty.startsWith(properties[properties.length - 1])
+						&& !properties.includes(possibleProperty))
+					possibleProperties.push(possibleProperty);
+			}
+			if (possibleProperties.length > 0)
+				return possibleProperties;
+		}
+		if (args["low-confidence"] !== undefined) {
+			const currentMode = args["low-confidence"];
+			let possibleModes = [];
+			for (var possibleMode of Object.values(LowConfidenceMode)) {
+				if (possibleMode.startsWith(currentMode)
+						&& possibleMode != currentMode)
+					possibleModes.push(possibleMode);
+					
+			}
+			if (possibleModes.length > 0)
+				return possibleModes;
+		}
 	})
 	.middleware([ yargsCompatProperties, yargsFixPositional ], true) //middleware seems to be buggy
 	.option('c', {
@@ -134,8 +162,8 @@ let args = yargs
 		alias: "low-confidence",
 		type: "string",
 		desc: "What to do if Readability.js is uncertain about what the core content actually is",
-		choices: ["no-op", "force", "exit"],
-		default: "no-op"
+		//default: "no-op", //don't set default because completion won't work
+		choices: ["no-op", "force", "exit"]
 	})
 	.option('p', {
 		alias: "properties",
@@ -147,7 +175,7 @@ let args = yargs
 		alias: "quiet",
 		type: "boolean",
 		desc: "Don't output extra information to stderr",
-		default: false
+		default: false 
 	})
 	.option('u', {
 		alias: "url",
@@ -181,8 +209,13 @@ Text-content and Html-content are mutually exclusive, and are always printed las
 Default value is "html-title,html-content".`) 
 	.wrap(Math.min(yargs.terminalWidth(), 100))
 	.strict()
-	//.wrap(yargs.terminalWidth())
 	.parse();
+
+if (!args["low-confidence"]) {
+	args["low-confidence"] = LowConfidenceMode.noOp;
+	args['l'] = LowConfidenceMode.noOp;
+}
+
 
 
 function printUsage() {
@@ -239,30 +272,12 @@ let wantedProperties = [];
 let justOutputHtml = false;
 
 if (args["properties"]) {
-	for (var property of args["properties"].split(',')) {
-		if (Object.values(Properties).includes(property)) {
-			wantedProperties.push(property);
-		} else {
-			console.error(`Invalid property: ${property}`);
-			setErrored(ExitCodes.badUsageCLI);
-		}
-	}
+	wantedProperties = args["properties"];
 } else {
 	wantedProperties = [ Properties.htmlTitle, Properties.htmlContent ];
 	justOutputHtml = true;
 }
 
-
-
-const LowConfidenceMode = {
-	noOp: "no-op",
-	force: "force",
-	exit: "exit"
-};
-if (!Object.values(LowConfidenceMode).includes(args["low-confidence"])) {
-	console.error(`Invalid mode: ${args["low-confidence"]}`);
-	setErrored(ExitCodes.badUsageCLI);
-}
 
 
 
