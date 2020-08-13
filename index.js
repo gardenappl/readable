@@ -278,6 +278,8 @@ if (inputIsFromStdin) {
 	promiseGetHTML.then(onLoadDOM, onLoadDOMError)
 }
 
+const { Readability, isProbablyReaderable } = require("@mozilla/readability");
+
 //Taken from https://stackoverflow.com/a/22706073/5701177
 function escapeHTML(string, document){
     var p = document.createElement("p");
@@ -290,11 +292,8 @@ function onLoadDOM(dom) {
 
 	let shouldParseArticle = true;
 
-	if (args["low-confidence"] != LowConfidenceMode.force) {
-		const Readerable = require("readability/Readability-readerable");
-
-		shouldParseArticle = Readerable.isProbablyReaderable(document);		
-	}
+	if (args["low-confidence"] != LowConfidenceMode.force)
+		shouldParseArticle = isProbablyReaderable(document);		
 
 	if (!shouldParseArticle) {
 		if (args["low-confidence"] == LowConfidenceMode.exit) {
@@ -323,8 +322,6 @@ function onLoadDOM(dom) {
 
 
 	if (shouldParseArticle) {
-		const Readability = require("readability");
-
 		if (!args["quiet"])
 			console.error("Processing...");
 
