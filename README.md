@@ -21,7 +21,7 @@ Here is a before-and-after comparison, using [an article from The Guardian](http
 
 **readability-cli** can be installed on any system with [Node.js](https://nodejs.org/en/):
 
-`npm install -g @gardenapple/readability-cli`
+`npm install -g readability-cli`
 
 ### Arch Linux
 
