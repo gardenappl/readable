@@ -55,6 +55,7 @@ Options:
 	-U  --is-url               Interpret SOURCE as a URL rather than file name
 	-q  --quiet                Don't output extra information to stderr
 	-l  --low-confidence MODE  What to do if Readability.js is uncertain about what the core content actually is
+	-j  --json                 Output properties as a JSON payload
 
 
 The --low-confidence option determines what should be done for documents where Readability can't tell what the core content is:
@@ -82,7 +83,7 @@ Default value is "html-title,html-content".`);
 
 
 const stringArgParams = ['_', "--", "low-confidence", "output", "properties", "url", "base"];
-const boolArgParams = ["quiet", "help", "version", "is-url"];
+const boolArgParams = ["quiet", "help", "version", "is-url", "json"];
 const alias = {
 	"url": 'u',
 	"output": 'o',
@@ -92,7 +93,8 @@ const alias = {
 	"is-url": 'U',
 	"quiet": 'q',
 	"low-confidence": 'l',
-	"help": 'h'
+	"help": 'h',
+	"json": 'j'
 }
 
 let args = parseArgs(process.argv.slice(2), {
@@ -185,7 +187,7 @@ delete args['--'];
 
 const outputArg = args['output'];
 const documentURL = args["base"] || inputURL;
-
+const outputJSON = args['json'];
 
 
 const Properties = {
@@ -330,6 +332,18 @@ function onLoadDOM(dom) {
 		if (!article) {
 			console.error("Couldn't process document. This error usually means that the input document is empty.");
 			setErrored(ExitCodes.dataError);
+			return;
+		}
+		if (outputJSON){
+			let result = {};
+			const allprops = ["title", "excerpt", "byline", "length", "dir", "textContent"];
+			for (propkey in allprops) {
+			    let prop = allprops[propkey];
+			    result[prop] = article[prop];
+			}
+			result["htmlContent"] = article.content;
+			result["htmlTitle"] = `<h1>${escapeHTML(article.title, document)}</h1>`
+			writeStream.write(JSON.stringify(result));
 			return;
 		}
 
