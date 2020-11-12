@@ -52,9 +52,9 @@ See `readable --help` for more information.
 
 `readable https://www.nytimes.com/2020/01/18/technology/clearview-privacy-facial-recognition.html | w3m -T text/html`
 
-**Download a web page using [cURL](https://en.wikipedia.org/wiki/CURL), parse it and save it into a file:**
+**Download a web page using [cURL](https://en.wikipedia.org/wiki/CURL), parse it and output as JSON:**
 
-`curl https://github.com/mozilla/readability | readable --base=https://github.com/mozilla/readability > example.html`
+`curl https://github.com/mozilla/readability | readable --base=https://github.com/mozilla/readability --json`
 
 It's a good idea to supply the --base parameter when piping input, otherwise `readable` won't know the document's URL, and things like relative links won't work.
 
