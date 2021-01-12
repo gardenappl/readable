@@ -59,7 +59,7 @@ Options:
 
 
 The --low-confidence option determines what should be done for documents where Readability can't tell what the core content is:
-	no-op   When unsure, don't touch the HTML, output as-is. If the --properties option is used, this will make the program crash.
+	no-op   When unsure, don't touch the HTML, output as-is. This is incompatible with the --properties=text-content option.
 	force   Process the document even when unsure (may produce really bad output).
 	exit    When unsure, exit with an error.
 
