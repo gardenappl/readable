@@ -84,21 +84,13 @@ function yargsCompatProperties(args) {
 	}
 }
 
-//Positional arguments sometimes don't get recognized when they're put
+//Positional sometimes don't get recognized when they're put
 //after other arguments, I think it's an oversight in yargs.
 function yargsFixPositional(args) {
-	if (args["-"]) {
-		if (args["source"])
-			args["source"] = args["-"];
-		else
-			args["source"].push(...args["-"]);
-	}
 	if (args["--"]) {
-		if (args["source"])
-			args["source"] = args["--"];
-		else
-			args["source"].push(...args["--"]);
-		delete args["--"];
+		if (!args["source"])
+			args["source"] = args["--"].shift();
+		args["_"] = args["--"];
 	}
 }
 
@@ -416,13 +408,20 @@ function onLoadDOM(dom) {
 		}
 		if (outputJSON) {
 			let result = {};
-			const allprops = ["title", "excerpt", "byline", "length", "dir", "textContent"];
-			for (propkey in allprops) {
-			    let prop = allprops[propkey];
-			    result[prop] = article[prop];
+			const jsonProperties = ["title", "excerpt", "byline", "length", "dir"];
+			for (jsonProperty of jsonProperties) {
+				if (!wantedPropertiesCustom || wantedProperties.includes(jsonProperty))
+					result[jsonProperty] = article[jsonProperty];
 			}
-			result["htmlContent"] = article.content;
-			result["htmlTitle"] = `<h1>${escapeHTML(article.title, document)}</h1>`
+			if (!wantedPropertiesCustom || wantedProperties.includes(Properties.textContent)) {
+				result[Properties.textContent] = article.textContent;
+			}
+			if (!wantedPropertiesCustom || wantedProperties.includes(Properties.htmlContent)) {
+				result[Properties.htmlContent] = article.content;
+			}
+			if (!wantedPropertiesCustom || wantedProperties.includes(Properties.htmlTitle)) {
+				result[Properties.htmlTitle] = `<h1>${escapeHTML(article.title, document)}</h1>`
+			}
 			writeStream.write(JSON.stringify(result));
 			return;
 		}
