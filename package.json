@@ -23,6 +23,6 @@
   "dependencies": {
     "jsdom": "^16.3.0",
     "readability": "github:mozilla/readability#master",
-    "yargs": "^15.4.1"
+    "yargs": "github:gardenappl/yargs#enable-fallback-to-standard-completion"
   }
 }

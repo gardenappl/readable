@@ -20,6 +20,7 @@ Firefox Reader Mode in your terminal! CLI tool for Mozilla's Readability library
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 //const parseArgs = require("minimist");
+const yargs = require("yargs");
 //JSDOM, fs, Readability, and Readability-readerable are loaded on-demand.
 //To-do: lazy loading?
 
@@ -62,7 +63,6 @@ const LowConfidenceMode = {
 	exit: "exit"
 };
 
-const yargs = require("yargs");
 
 //backwards compat with old, comma-separated values
 function yargsCompatProperties(args) { 
@@ -113,7 +113,7 @@ let args = yargs
 			type: "string"
 		});
 	})
-	.completion('completion', false, function(current, args) {
+	.completion('--completion', false, function(current, args, defaultCompletion, done) {
 		if (args["properties"] !== undefined) {
 			const properties = args["properties"];
 			let possibleProperties = [];
@@ -123,7 +123,7 @@ let args = yargs
 					possibleProperties.push(possibleProperty);
 			}
 			if (possibleProperties.length > 0)
-				return possibleProperties;
+				done(possibleProperties);
 		}
 		if (args["low-confidence"] !== undefined) {
 			const currentMode = args["low-confidence"];
@@ -135,12 +135,12 @@ let args = yargs
 					
 			}
 			if (possibleModes.length > 0)
-				return possibleModes;
+				done(possibleModes);
 		}
+		defaultCompletion();
 	})
 	.middleware([ yargsCompatProperties, yargsFixPositional ], true) //middleware seems to be buggy
-	.option('c', {
-		alias: "completion",
+	.option("completion", {
 		type: "boolean",
 		desc: "Print script for bash/zsh completion"
 	})
