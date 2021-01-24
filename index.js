@@ -231,7 +231,7 @@ The --properties option accepts a comma-separated list of values (with no spaces
 
 Text-content and Html-content are mutually exclusive, and are always printed last.
 Default value is "html-title,html-content".`) 
-	.wrap(Math.min(yargs.terminalWidth(), 110))
+	.wrap(Math.min(yargs.terminalWidth(), 120))
 	.strict()
 	.parse();
 
@@ -329,7 +329,7 @@ if (inputIsFromStdin) {
 	if (!args["quiet"]) {
 		console.error("Reading...");
 		if (!documentURL)
-			console.error("Note: piping input with unknown " +
+			console.error("Warning: piping input with unknown " +
 				"URL. This means that relative links will " +
 				"be broken. Supply the --base parameter to fix.")
 	}
@@ -410,7 +410,7 @@ function onLoadDOM(dom) {
 		const reader = new Readability(document);
 		const article = reader.parse();
 		if (!article) {
-			console.error("Couldn't process document. This error usually means that the input document is empty.");
+			console.error("Couldn't process document.");
 			setErrored(ExitCodes.dataError);
 			return;
 		}
