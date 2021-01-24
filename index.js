@@ -187,12 +187,24 @@ let args = yargs
 	.option("url", {
 		alias: 'u',
 		type: "string",
-		desc: "(deprecated) alias for --base"
+		desc: "(deprecated) alias for --base",
+		hidden: true,
+		//deprecated: true //completion script does not respect this value, so just say it in the description
+	})
+	.option("is-file", {
+		alias: 'f',
+		type: "boolean",
+		desc: "Interpret SOURCE as a file name rather than a URL",
+		default: false,
+		hidden: true,
+		//deprecated: true
 	})
 	.option("is-url", {
 		alias: 'U',
 		type: "boolean",
-		desc: "Interpret SOURCE as a URL rather than file name"
+		desc: "(deprecated) Interpret SOURCE as a URL rather than file name",
+		hidden: true,
+		//deprecated: true
 	})
 	.option("json", {
 		alias: 'j',
@@ -271,7 +283,9 @@ let inputFile;
 let inputURL;
 let inputIsFromStdin = false;
 
-if (args["is-url"] || inputArg.startsWith("https://") || inputArg.startsWith("http://"))
+if (args["is-url"] && !(inputArg.includes("://")))
+	inputArg = "https://" + inputArg;
+if (!args["is-file"] && (inputArg.startsWith("https://") || inputArg.startsWith("http://")))
 	inputURL = inputArg;
 else if (inputArg == '-')
 	inputIsFromStdin = true;
@@ -285,13 +299,13 @@ const outputJSON = args['json'];
 
 
 let wantedProperties = [];
-let justOutputHtml = false;
+let wantedPropertiesCustom = false;
 
 if (args["properties"]) {
 	wantedProperties = args["properties"];
+	wantedPropertiesCustom = true;
 } else {
 	wantedProperties = [ Properties.htmlTitle, Properties.htmlContent ];
-	justOutputHtml = true;
 }
 
 
@@ -371,7 +385,7 @@ function onLoadDOM(dom) {
 		} else {
 			if (!args["quiet"])
 				console.error("Not sure if this document should be processed. Not processing");
-			if (!justOutputHtml) {
+			if (wantedPropertiesCustom) {
 				console.error("Can't output properties");
 				setErrored(ExitCodes.dataError);
 				return;
@@ -400,7 +414,7 @@ function onLoadDOM(dom) {
 			setErrored(ExitCodes.dataError);
 			return;
 		}
-		if (outputJSON){
+		if (outputJSON) {
 			let result = {};
 			const allprops = ["title", "excerpt", "byline", "length", "dir", "textContent"];
 			for (propkey in allprops) {
