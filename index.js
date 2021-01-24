@@ -19,7 +19,8 @@ Firefox Reader Mode in your terminal! CLI tool for Mozilla's Readability library
 	You should have received a copy of the GNU General Public License
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-const parseArgs = require("minimist");
+//const parseArgs = require("minimist");
+const yargs = require("yargs");
 //JSDOM, fs, Readability, and Readability-readerable are loaded on-demand.
 //To-do: lazy loading?
 
@@ -38,110 +39,212 @@ function setErrored(exitCode) {
 	errored = true;
 }
 
-function printUsage() {
-	console.error(`
-Usage:
-	readable [SOURCE] [options]
-	readable [options] -- [SOURCE]
-	(where SOURCE is a file, an http(s) URL, or '-' for standard input)
-	
-Options:
-	-b  --base URL             Set URL as the base for relative links, useful when parsing local files or standard input
-	-h  --help                 Print help
-	-o  --output OUTPUT_FILE   Output to OUTPUT_FILE
-	-p  --properties PROPS...  Output specific properties of the parsed article
-	-V  --version              Print version
-	-u  --url                  (deprecated) alias for --base
-	-U  --is-url               Interpret SOURCE as a URL rather than file name
-	-q  --quiet                Don't output extra information to stderr
-	-l  --low-confidence MODE  What to do if Readability.js is uncertain about what the core content actually is
-	-j  --json                 Output properties as a JSON payload
+
+//
+//Parsing arguments
+//
+
+const Properties = {
+	htmlTitle: "html-title",
+	title: "title",
+	excerpt: "excerpt",
+	byline: "byline",
+	length: "length",
+	dir: "dir",
+	htmlContent: "html-content",
+	textContent: "text-content"
+};
+
+const LowConfidenceMode = {
+	noOp: "no-op",
+	force: "force",
+	exit: "exit"
+};
 
 
-The --low-confidence option determines what should be done for documents where Readability can't tell what the core content is:
-	no-op   When unsure, don't touch the HTML, output as-is. This is incompatible with the --properties=text-content option.
-	force   Process the document even when unsure (may produce really bad output).
-	exit    When unsure, exit with an error.
+//backwards compat with old, comma-separated values
+function yargsCompatProperties(args) { 
+	if (args["properties"]) {
+		for (var i = 0; i < args["properties"].length; i++) {
+			const property = args["properties"][i];
+			if (property.indexOf(',') > -1) {
+				const split = args["properties"][i].split(',');
+				args["properties"].splice(i, 1, ...split);
+				continue;
+			}
+			if (!Object.values(Properties).includes(property)) {
+				args["properties"].splice(i, 1);
+				i--;
+				if (!args["--"])
+					args["--"] = [ property ];
+				else
+					args["--"].push(property);
+			}
+		}
+	}
+}
+
+//Positional arguments sometimes don't get recognized when they're put
+//after other arguments, I think it's an oversight in yargs.
+function yargsFixPositional(args) {
+	if (args["-"]) {
+		if (args["source"])
+			args["source"] = args["-"];
+		else
+			args["source"].push(...args["-"]);
+	}
+	if (args["--"]) {
+		if (args["source"])
+			args["source"] = args["--"];
+		else
+			args["source"].push(...args["--"]);
+		delete args["--"];
+	}
+}
+
+
+let args = yargs
+	.version(false)
+	.command("* [source]", "Process HTML input", (yargs) => { 
+		yargs.positional("source", {
+			desc: "A file, an http(s) URL, or '-' for standard input",
+			type: "string"
+		});
+	})
+	.completion('--completion', false, function(current, args, defaultCompletion, done) {
+		if (args["properties"] !== undefined) {
+			const properties = args["properties"];
+			let possibleProperties = [];
+			for (var possibleProperty of Object.values(Properties)) {
+				if (possibleProperty.startsWith(properties[properties.length - 1])
+						&& !properties.includes(possibleProperty))
+					possibleProperties.push(possibleProperty);
+			}
+			if (possibleProperties.length > 0)
+				done(possibleProperties);
+		}
+		if (args["low-confidence"] !== undefined) {
+			const currentMode = args["low-confidence"];
+			let possibleModes = [];
+			for (var possibleMode of Object.values(LowConfidenceMode)) {
+				if (possibleMode.startsWith(currentMode)
+						&& possibleMode != currentMode)
+					possibleModes.push(possibleMode);
+					
+			}
+			if (possibleModes.length > 0)
+				done(possibleModes);
+		}
+		defaultCompletion();
+	})
+	.middleware([ yargsCompatProperties, yargsFixPositional ], true) //middleware seems to be buggy
+	.option("completion", {
+		type: "boolean",
+		desc: "Print script for bash/zsh completion"
+	})
+	.option("version", {
+		alias: 'V',
+		type: "boolean",
+		desc: "Print version"
+	})
+	.option("help", {
+		alias: 'h',
+		desc: "Show help"
+	})
+	.option("base", {
+		alias: 'b',
+		desc: "Show help"
+	})
+	.option("output", {
+		alias: 'o',
+		type: "string",
+		desc: "The file to which the result should be output"
+	})
+	.option("low-confidence", {
+		alias: 'l',
+		type: "string",
+		desc: "What to do if Readability.js is uncertain about what the core content actually is",
+		//default: "no-op", //don't set default because completion won't work
+		choices: ["no-op", "force", "exit"]
+	})
+	.option("properties", {
+		alias: 'p',
+		type: "array",
+		desc: "Output specific properties of the parsed article",
+		choices: ["html-title", "title", "excerpt", "byline", "length", "dir", "html-content", "text-content"]
+	})
+	.option("quiet", {
+		alias: 'q',
+		type: "boolean",
+		desc: "Don't output extra information to stderr",
+		default: false 
+	})
+	.option("base", {
+		alias: 'b',
+		type: "string",
+		desc: "Set the document URL when parsing standard input or a local file (this affects relative links)"
+	})
+	.option("url", {
+		alias: 'u',
+		type: "string",
+		desc: "(deprecated) alias for --base"
+	})
+	.option("is-url", {
+		alias: 'U',
+		type: "boolean",
+		desc: "Interpret SOURCE as a URL rather than file name"
+	})
+	.option("json", {
+		alias: 'j',
+		type: "boolean",
+		desc: "Output properties as a JSON payload"
+	})
+	.epilogue(`The --low-confidence option determines what should be done for documents where Readability can't tell what the core content is:
+   no-op   When unsure, don't touch the HTML, output as-is. This is incompatible with the --properties option.
+   force   Process the document even when unsure (may produce really bad output).
+   exit    When unsure, exit with an error.
 
 Default value is "no-op".
 
 
 The --properties option accepts a comma-separated list of values (with no spaces in-between). Suitable values are:
-	html-title     Outputs the article's title, wrapped in an <h1> tag.
-	title          Outputs the title in the format "Title: $TITLE".
-	excerpt        Article description, or short excerpt from the content, in the format "Excerpt: $EXCERPT"
-	byline         Author metadata, in the format "Author: $AUTHOR"
-	length         Length of the article in characters, in the format "Length: $LENGTH"
-	dir            Content direction, is either "Direction: ltr" or "Direction: rtl"
-	html-content   Outputs the article's main content as HTML.
-	text-content   Outputs the article's main content as plain text.
+   html-title     Outputs the article's title, wrapped in an <h1> tag.
+   title          Outputs the title in the format "Title: $TITLE".
+   excerpt        Article description, or short excerpt from the content, in the format "Excerpt: $EXCERPT"
+   byline         Author metadata, in the format "Author: $AUTHOR"
+   length         Length of the article in characters, in the format "Length: $LENGTH"
+   dir            Content direction, is either "Direction: ltr" or "Direction: rtl"
+   html-content   Outputs the article's main content as HTML.
+   text-content   Outputs the article's main content as plain text.
 
 Text-content and Html-content are mutually exclusive, and are always printed last.
-Default value is "html-title,html-content".`); 
+Default value is "html-title,html-content".`) 
+	.wrap(Math.min(yargs.terminalWidth(), 110))
+	.strict()
+	.parse();
+
+if (!args["low-confidence"]) {
+	args["low-confidence"] = LowConfidenceMode.noOp;
+	args['l'] = LowConfidenceMode.noOp;
 }
 
-
-
-const stringArgParams = ['_', "--", "low-confidence", "output", "properties", "url", "base"];
-const boolArgParams = ["quiet", "help", "version", "is-url", "json"];
-const alias = {
-	"url": 'u',
-	"output": 'o',
-	"properties": 'p',
-	"version": 'V',
-	"base": 'b',
-	"is-url": 'U',
-	"quiet": 'q',
-	"low-confidence": 'l',
-	"help": 'h',
-	"json": 'j'
-}
-
-let args = parseArgs(process.argv.slice(2), {
-	string: stringArgParams,
-	boolean: boolArgParams,
-	default: {
-		"low-confidence": "no-op",
-		"quiet": false
-	},
-	alias: alias,
-	"--": true
-});
-
-
-//Backwards compat
-if (args['u'])
-	args['b'] = args['u'];
 if (args["url"]) {
-	console.error("Note: the --url option is deprecated, use --base or -b instead");
+	console.error("Note: --url option is deprecated, please use --base instead.");
 	args["base"] = args["url"];
 }
 
 
-//Minimist's parseArgs accepts a function for handling unknown parameters,
-//but it works in a stupid way, so I'm writing my own.
-
-for (var key of Object.keys(args)) {
-	if (!stringArgParams.includes(key) && !boolArgParams.includes(key) &&
-			!Object.values(alias).includes(key)) {
-		console.error(`Unknown argument: ${key}`);
-		setErrored(ExitCodes.badUsageCLI);
-
-	} else if (stringArgParams.includes(key) && args[key] === "") {
-		console.error(`Error: no value given for --${key}`);
-		setErrored(ExitCodes.badUsageCLI);
-	}
-
-}
-if (errored) {
-	printUsage();
-	return;
+function printUsage() {
+	yargs.showHelp();
 }
 
-if (args["help"]) {
-	printUsage();
-	return;
-} else if (args.version) {
+if (args["completion"]) {
+	yargs.showCompletionScript();
+	process.exit();
+}
+
+
+if (args.version) {
 	console.log(`readability-cli v${require("./package.json").version}`);
 	console.log(`Node.js ${process.version}`);
 	return;
@@ -150,13 +253,7 @@ if (args["help"]) {
 
 
 let inputArg;
-const inputCount = args['_'].length + args['--'].length;
-if (inputCount > 1) {
-	console.error("Too many input arguments");
-	printUsage();
-	setErrored(ExitCodes.badUsageCLI);
-	return;
-} else if (inputCount == 0) {
+if (!args["source"]) {
 	if (process.stdin.isTTY) {
 		console.error("No input provided");
 		printUsage();
@@ -166,7 +263,7 @@ if (inputCount > 1) {
 		inputArg = '-'
 	}
 } else {
-	inputArg = (args['_'].length > 0) ? args['_'][0] : args['--'][0];
+	inputArg = args["source"];
 }
 
 //Get input parameter, remove inputArg from args
@@ -181,53 +278,22 @@ else if (inputArg == '-')
 else
 	inputFile = inputArg;
 
-delete args['_'];
-delete args['--'];
-
 
 const outputArg = args['output'];
 const documentURL = args["base"] || inputURL;
 const outputJSON = args['json'];
 
 
-const Properties = {
-	htmlTitle: "html-title",
-	title: "title",
-	excerpt: "excerpt",
-	byline: "byline",
-	length: "length",
-	dir: "dir",
-	htmlContent: "html-content",
-	textContent: "text-content"
-};
 let wantedProperties = [];
 let justOutputHtml = false;
 
 if (args["properties"]) {
-	for (var property of args["properties"].split(',')) {
-		if (Object.values(Properties).includes(property)) {
-			wantedProperties.push(property);
-		} else {
-			console.error(`Invalid property: ${property}`);
-			setErrored(ExitCodes.badUsageCLI);
-		}
-	}
+	wantedProperties = args["properties"];
 } else {
 	wantedProperties = [ Properties.htmlTitle, Properties.htmlContent ];
 	justOutputHtml = true;
 }
 
-
-
-const LowConfidenceMode = {
-	noOp: "no-op",
-	force: "force",
-	exit: "exit"
-};
-if (!Object.values(LowConfidenceMode).includes(args["low-confidence"])) {
-	console.error(`Invalid mode: ${args["low-confidence"]}`);
-	setErrored(ExitCodes.badUsageCLI);
-}
 
 
 
