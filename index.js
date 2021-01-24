@@ -144,46 +144,46 @@ let args = yargs
 		type: "boolean",
 		desc: "Print script for bash/zsh completion"
 	})
-	.option('V', {
-		alias: "version",
+	.option("version", {
+		alias: 'V',
 		type: "boolean",
 		desc: "Print version"
 	})
-	.option('h', {
-		alias: "help",
+	.option("help", {
+		alias: 'h',
 		desc: "Show help"
 	})
-	.option('o', {
-		alias: "output",
+	.option("output", {
+		alias: 'o',
 		type: "string",
 		desc: "The file to which the result should be output"
 	})
-	.option('l', {
-		alias: "low-confidence",
+	.option("low-confidence", {
+		alias: 'l',
 		type: "string",
 		desc: "What to do if Readability.js is uncertain about what the core content actually is",
 		//default: "no-op", //don't set default because completion won't work
 		choices: ["no-op", "force", "exit"]
 	})
-	.option('p', {
-		alias: "properties",
+	.option("properties", {
+		alias: 'p',
 		type: "array",
 		desc: "Output specific properties of the parsed article",
 		choices: ["html-title", "title", "excerpt", "byline", "length", "dir", "html-content", "text-content"]
 	})
-	.option('q', {
-		alias: "quiet",
+	.option("quiet", {
+		alias: 'q',
 		type: "boolean",
 		desc: "Don't output extra information to stderr",
 		default: false 
 	})
-	.option('u', {
-		alias: "url",
+	.option("url", {
+		alias: 'u',
 		type: "string",
 		desc: "Set the document URL when parsing standard input or a local file (this affects relative links)"
 	})
-	.option('U', {
-		alias: "is-url",
+	.option("is-url", {
+		alias: 'U',
 		type: "boolean",
 		desc: "Interpret SOURCE as a URL rather than file name"
 	})
@@ -207,7 +207,7 @@ The --properties option accepts a comma-separated list of values (with no spaces
 
 Text-content and Html-content are mutually exclusive, and are always printed last.
 Default value is "html-title,html-content".`) 
-	.wrap(Math.min(yargs.terminalWidth(), 100))
+	.wrap(Math.min(yargs.terminalWidth(), 110))
 	.strict()
 	.parse();
 
