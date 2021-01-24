@@ -1,3 +1,11 @@
+*.html
+*.htm
+
+
+#
+# Node.js .gitignore
+#
+
 # Logs
 logs
 *.log
