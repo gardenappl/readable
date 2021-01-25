@@ -20,6 +20,8 @@ Firefox Reader Mode in your terminal! CLI tool for Mozilla's Readability library
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+const path = require("path");
+
 // GNU gettext gives preference to LANGUAGE, but this order is consistent with Yargs:
 const locale = (
 	process.env.LC_ALL ||
@@ -32,7 +34,8 @@ const locale = (
 const yargs = require("yargs");
 const __ = require("y18n")({
 	locale: locale,
-	updateFiles: false
+	updateFiles: false,
+	directory: path.resolve(__dirname, 'locales')
 }).__;
 
 //JSDOM, fs, Readability, and Readability-readerable are loaded on-demand.
