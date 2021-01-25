@@ -58,6 +58,10 @@ See `readable --help` for more information.
 
 It's a good idea to supply the --base parameter when piping input, otherwise `readable` won't know the document's URL, and things like relative links won't work.
 
-### Why Node.js? It's so slow!
+## Localization
+
+See [locales](locales).
+
+## Why Node.js? It's so slow!
 
 I know that it's slow, but JavaScript is the most sensible option for this, since Mozilla's Readabilty library is written in JavaScript. [There have been ports of the Readability algorithm to other languages](https://github.com/masukomi/arc90-readability), but Mozilla's version is the only one that's actively maintained as of 2020.
