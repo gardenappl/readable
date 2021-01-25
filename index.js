@@ -4,7 +4,7 @@
 
 Firefox Reader Mode in your terminal! CLI tool for Mozilla's Readability library
 
-	Copyright (C) 2020 gardenapple
+	Copyright (C) 2021 gardenapple
                                                                                                     
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -19,8 +19,22 @@ Firefox Reader Mode in your terminal! CLI tool for Mozilla's Readability library
 	You should have received a copy of the GNU General Public License
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-//const parseArgs = require("minimist");
+
+// GNU gettext gives preference to LANGUAGE, but this order is consistent with Yargs:
+const locale = (
+	process.env.LC_ALL ||
+	process.env.LC_MESSAGES ||
+	process.env.LANG ||
+	process.env.LANGUAGE ||
+	'en_US'
+).replace(/[.:].*/, '');
+
 const yargs = require("yargs");
+const __ = require("y18n")({
+	locale: locale,
+	updateFiles: false
+}).__;
+
 //JSDOM, fs, Readability, and Readability-readerable are loaded on-demand.
 //To-do: lazy loading?
 
@@ -97,7 +111,7 @@ function yargsFixPositional(args) {
 
 let args = yargs
 	.version(false)
-	.command("* [source]", "Process HTML input", (yargs) => { 
+	.command("* [source]", __`Process HTML input`, (yargs) => { 
 		yargs.positional("source", {
 			desc: "A file, an http(s) URL, or '-' for standard input",
 			type: "string"
@@ -132,61 +146,57 @@ let args = yargs
 	.middleware([ yargsCompatProperties, yargsFixPositional ], true) //middleware seems to be buggy
 	.option("completion", {
 		type: "boolean",
-		desc: "Print script for bash/zsh completion"
+		desc: __`Print script for bash/zsh completion`
 	})
 	.option("version", {
 		alias: 'V',
 		type: "boolean",
-		desc: "Print version"
+		desc: __`Print version`
 	})
 	.option("help", {
 		alias: 'h',
-		desc: "Show help"
-	})
-	.option("base", {
-		alias: 'b',
-		desc: "Show help"
+		desc: __`Show help`
 	})
 	.option("output", {
 		alias: 'o',
 		type: "string",
-		desc: "The file to which the result should be output"
+		desc: __`The file to which the result should be output`
 	})
 	.option("low-confidence", {
 		alias: 'l',
 		type: "string",
-		desc: "What to do if Readability.js is uncertain about what the core content actually is",
+		desc: __`What to do if Readability.js is uncertain about what the core content actually is`,
 		//default: "no-op", //don't set default because completion won't work
 		choices: ["no-op", "force", "exit"]
 	})
 	.option("properties", {
 		alias: 'p',
 		type: "array",
-		desc: "Output specific properties of the parsed article",
+		desc: __`Output specific properties of the parsed article`,
 		choices: ["html-title", "title", "excerpt", "byline", "length", "dir", "html-content", "text-content"]
 	})
 	.option("quiet", {
 		alias: 'q',
 		type: "boolean",
-		desc: "Don't output extra information to stderr",
+		desc: __`Don't output extra information to stderr`,
 		default: false 
 	})
 	.option("base", {
 		alias: 'b',
 		type: "string",
-		desc: "Set the document URL when parsing standard input or a local file (this affects relative links)"
+		desc: __`Set the document URL when parsing standard input or a local file (this affects relative links)`
 	})
 	.option("url", {
 		alias: 'u',
 		type: "string",
-		desc: "(deprecated) alias for --base",
+		desc: __`(deprecated) alias for --base`,
 		hidden: true,
 		//deprecated: true //completion script does not respect this value, so just say it in the description
 	})
 	.option("is-file", {
 		alias: 'f',
 		type: "boolean",
-		desc: "Interpret SOURCE as a file name rather than a URL",
+		desc: __`Interpret SOURCE as a file name rather than a URL`,
 		default: false,
 		hidden: true,
 		//deprecated: true
@@ -194,35 +204,35 @@ let args = yargs
 	.option("is-url", {
 		alias: 'U',
 		type: "boolean",
-		desc: "(deprecated) Interpret SOURCE as a URL rather than file name",
+		desc: __`(deprecated) Interpret SOURCE as a URL rather than file name`,
 		hidden: true,
 		//deprecated: true
 	})
 	.option("json", {
 		alias: 'j',
 		type: "boolean",
-		desc: "Output properties as a JSON payload"
+		desc: __`Output properties as a JSON payload`
 	})
-	.epilogue(`The --low-confidence option determines what should be done for documents where Readability can't tell what the core content is:
-   no-op   When unsure, don't touch the HTML, output as-is. This is incompatible with the --properties option.
-   force   Process the document even when unsure (may produce really bad output).
-   exit    When unsure, exit with an error.
-
-Default value is "no-op".
-
-
-The --properties option accepts a comma-separated list of values (with no spaces in-between). Suitable values are:
-   html-title     Outputs the article's title, wrapped in an <h1> tag.
-   title          Outputs the title in the format "Title: $TITLE".
-   excerpt        Article description, or short excerpt from the content, in the format "Excerpt: $EXCERPT"
-   byline         Author metadata, in the format "Author: $AUTHOR"
-   length         Length of the article in characters, in the format "Length: $LENGTH"
-   dir            Content direction, is either "Direction: ltr" or "Direction: rtl"
-   html-content   Outputs the article's main content as HTML.
-   text-content   Outputs the article's main content as plain text.
-
-Text-content and Html-content are mutually exclusive, and are always printed last.
-Default value is "html-title,html-content".`) 
+	.epilogue(__`The --low-confidence option determines what should be done for documents where Readability can't tell what the core content is:\n` +
+__`   no-op   When unsure, don't touch the HTML, output as-is. This is incompatible with the --properties option.\n` +
+__`   force   Process the document even when unsure (may produce really bad output).\n` +
+__`   exit    When unsure, exit with an error.\n` +
+  '\n' +
+__`Default value is "no-op".\n` +
+  '\n' +
+  '\n' +
+__`The --properties option accepts a comma-separated list of values (with no spaces in-between). Suitable values are:\n` +
+__`   html-title     Outputs the article's title, wrapped in an <h1> tag.\n` +
+__`   title          Outputs the title in the format "Title: $TITLE".\n` +
+__`   excerpt        Article description, or short excerpt from the content, in the format "Excerpt: $EXCERPT".\n` +
+__`   byline         Author metadata, in the format "Author: $AUTHOR".\n` +
+__`   length         Length of the article in characters, in the format "Length: $LENGTH".\n` +
+__`   dir            Content direction, is either "Direction: ltr" or "Direction: rtl".\n` +
+__`   html-content   Outputs the article's main content as HTML.\n` +
+__`   text-content   Outputs the article's main content as plain text.\n` +
+  '\n' +
+__`Text-content and Html-content are mutually exclusive, and are always printed last.\n` +
+__`Default value is "html-title,html-content".\n`)
 	.wrap(Math.min(yargs.terminalWidth(), 120))
 	.strict()
 	.parse();
@@ -232,8 +242,11 @@ if (!args["low-confidence"]) {
 	args['l'] = LowConfidenceMode.noOp;
 }
 
+if (args["is-url"]) {
+	console.error(__`Note: --is-url option is deprecated.`);
+}
 if (args["url"]) {
-	console.error("Note: --url option is deprecated, please use --base instead.");
+	console.error(__`Note: --url option is deprecated, please use --base instead.`);
 	args["base"] = args["url"];
 }
 
@@ -259,7 +272,7 @@ if (args.version) {
 let inputArg;
 if (!args["source"]) {
 	if (process.stdin.isTTY) {
-		console.error("No input provided");
+		console.error(__`No input provided`);
 		printUsage();
 		setErrored(ExitCodes.badUsageCLI);
 		return;
@@ -275,9 +288,9 @@ let inputFile;
 let inputURL;
 let inputIsFromStdin = false;
 
-if (args["is-url"] && !(inputArg.includes("://")))
+if (args["is-url"] && inputArg.search(/^\w+:\/\//) != -1)
 	inputArg = "https://" + inputArg;
-if (!args["is-file"] && (inputArg.startsWith("https://") || inputArg.startsWith("http://")))
+if (!args["is-file"] && inputArg.search(/^\w+:\/\//) != -1)
 	inputURL = inputArg;
 else if (inputArg == '-')
 	inputIsFromStdin = true;
@@ -321,9 +334,7 @@ if (inputIsFromStdin) {
 	if (!args["quiet"]) {
 		console.error("Reading...");
 		if (!documentURL)
-			console.error("Warning: piping input with unknown " +
-				"URL. This means that relative links will " +
-				"be broken. Supply the --base parameter to fix.")
+			console.error(__`Warning: piping input with unknown URL. This means that relative links will be broken. Supply the --base parameter to fix.`)
 	}
 	read(process.stdin).then(result => {
 		const JSDOM = require("jsdom").JSDOM;
@@ -332,17 +343,10 @@ if (inputIsFromStdin) {
 } else {
 	const JSDOM = require("jsdom").JSDOM;
 	if (!args["quiet"])
-		console.error("Retrieving...");
+		console.error(__`Retrieving...`);
 	let promiseGetHTML;
 	if (inputURL) {
-		promiseGetHTML = JSDOM.fromURL(inputURL).catch(error => {
-			if (error instanceof TypeError) {
-				console.error(`Invalid URL: ${inputURL}`);
-				setErrored(ExitCodes.dataError);
-			}
-
-			return Promise.reject();
-		});
+		promiseGetHTML = JSDOM.fromURL(inputURL)
 	} else if (inputFile) {
 		promiseGetHTML = JSDOM.fromFile(inputFile, {
 			url: documentURL
@@ -371,14 +375,14 @@ function onLoadDOM(dom) {
 
 	if (!shouldParseArticle) {
 		if (args["low-confidence"] == LowConfidenceMode.exit) {
-			console.error("Not sure if this document should be processed, exiting");
+			console.error(__`Not sure if this document should be processed, exiting`);
 			setErrored(ExitCodes.dataError);
 			return;
 		} else {
 			if (!args["quiet"])
-				console.error("Not sure if this document should be processed. Not processing");
+				console.error(__`Not sure if this document should be processed. Not processing`);
 			if (wantedPropertiesCustom) {
-				console.error("Can't output properties");
+				console.error(__`Can't output properties`);
 				setErrored(ExitCodes.dataError);
 				return;
 			}
@@ -397,12 +401,12 @@ function onLoadDOM(dom) {
 
 	if (shouldParseArticle) {
 		if (!args["quiet"])
-			console.error("Processing...");
+			console.error(__`Processing...`);
 
 		const reader = new Readability(document);
 		const article = reader.parse();
 		if (!article) {
-			console.error("Couldn't process document.");
+			console.error(__`Couldn't process document.`);
 			setErrored(ExitCodes.dataError);
 			return;
 		}
@@ -427,19 +431,19 @@ function onLoadDOM(dom) {
 		}
 
 		if (wantedProperties.includes(Properties.title)) {
-			writeStream.write(`Title: ${article.title}\n`);
+			writeStream.write(__`Title: ${article.title}\n`);
 		}
 		if (wantedProperties.includes(Properties.excerpt)) {
-			writeStream.write(`Excerpt: ${article.excerpt}\n`);
+			writeStream.write(__`Excerpt: ${article.excerpt}\n`);
 		}
 		if (wantedProperties.includes(Properties.byline)) {
-			writeStream.write(`Author: ${article.byline}\n`);
+			writeStream.write(__`Author: ${article.byline}\n`);
 		}
 		if (wantedProperties.includes(Properties.length)) {
-			writeStream.write(`Length: ${article.length}\n`);
+			writeStream.write(__`Length: ${article.length}\n`);
 		}
 		if (wantedProperties.includes(Properties.dir)) {
-			writeStream.write(`Direction: ${article.dir}\n`);
+			writeStream.write(__`Direction: ${article.dir}\n`);
 		}
 		if (wantedProperties.includes(Properties.htmlTitle)) {
 			writeStream.write(`<h1>${escapeHTML(article.title, document)}</h1>\n`);
@@ -456,25 +460,25 @@ function onLoadDOM(dom) {
 }
 
 function onLoadDOMError(error) {
-	//resolved earlier
-	if (!error) 
-		return;
-
-	if (error.code == "ENOENT") {
+	if (error instanceof TypeError && inputURL) {
+		console.error(__`Invalid URL: ${inputURL}`);
+		setErrored(ExitCodes.dataError);
+	} else if (error.code == "ENOENT") {
 		console.error(error.message);
 		setErrored(ExitCodes.noInput);
 	} else if (error.code == "EACCES") {
 		console.error(error.message);
 		setErrored(ExitCodes.noPermission);
 	} else if (error.error && error.error.code == "ENOTFOUND") {
-		console.error(`Host not found: '${error.error.hostname}'`);
+		console.error(__`Host not found: '${error.error.hostname}'`);
 		setErrored(ExitCodes.noHost);
 	} else if (error.statusCode) {
-		console.error(`Status error: ${error.response.statusMessage}`);
+		console.error(__`Status error: ${error.response.statusMessage}`);
 		setErrored(ExitCodes.noHost);
 	} else {
-		console.error(error);
-		if (error.stack)
-			console.error(error.stack);
+		console.error(error.message);
+//		if (error.stack)
+//			console.error(error.stack)
+		setErrored(ExitCodes.dataError);
 	}
 }
