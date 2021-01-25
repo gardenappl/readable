@@ -116,7 +116,7 @@ let args = yargs
 	.version(false)
 	.command("* [source]", __`Process HTML input`, (yargs) => { 
 		yargs.positional("source", {
-			desc: "A file, an http(s) URL, or '-' for standard input",
+			desc: __`A file, an http(s) URL, or '-' for standard input`,
 			type: "string"
 		});
 	})
@@ -217,14 +217,14 @@ let args = yargs
 		desc: __`Output properties as a JSON payload`
 	})
 	.epilogue(__`The --low-confidence option determines what should be done for documents where Readability can't tell what the core content is:\n` +
-__`   no-op   When unsure, don't touch the HTML, output as-is. This is incompatible with the --properties option.\n` +
+__`   no-op   When unsure, don't touch the HTML, output as-is. This is incompatible with the --properties and --json options.\n` +
 __`   force   Process the document even when unsure (may produce really bad output).\n` +
 __`   exit    When unsure, exit with an error.\n` +
   '\n' +
 __`Default value is "no-op".\n` +
   '\n' +
   '\n' +
-__`The --properties option accepts a comma-separated list of values (with no spaces in-between). Suitable values are:\n` +
+__`The --properties option accepts a list of values, separated by spaces. Suitable values are:\n` +
 __`   html-title     Outputs the article's title, wrapped in an <h1> tag.\n` +
 __`   title          Outputs the title in the format "Title: $TITLE".\n` +
 __`   excerpt        Article description, or short excerpt from the content, in the format "Excerpt: $EXCERPT".\n` +
@@ -235,7 +235,7 @@ __`   html-content   Outputs the article's main content as HTML.\n` +
 __`   text-content   Outputs the article's main content as plain text.\n` +
   '\n' +
 __`Text-content and Html-content are mutually exclusive, and are always printed last.\n` +
-__`Default value is "html-title,html-content".\n`)
+__`Default value is "html-title html-content".\n`)
 	.wrap(Math.min(yargs.terminalWidth(), 120))
 	.strict()
 	.parse();
@@ -291,7 +291,7 @@ let inputFile;
 let inputURL;
 let inputIsFromStdin = false;
 
-if (args["is-url"] && inputArg.search(/^\w+:\/\//) != -1)
+if (args["is-url"] && inputArg.search(/^\w+:\/\//) == -1)
 	inputArg = "https://" + inputArg;
 if (!args["is-file"] && inputArg.search(/^\w+:\/\//) != -1)
 	inputURL = inputArg;
@@ -372,7 +372,6 @@ function onLoadDOM(dom) {
 	const document = dom.window.document;
 
 	let shouldParseArticle = true;
-
 	if (args["low-confidence"] != LowConfidenceMode.force)
 		shouldParseArticle = isProbablyReaderable(document);		
 
@@ -384,7 +383,7 @@ function onLoadDOM(dom) {
 		} else {
 			if (!args["quiet"])
 				console.error(__`Not sure if this document should be processed. Not processing`);
-			if (wantedPropertiesCustom) {
+			if (args["json"] || wantedPropertiesCustom) {
 				console.error(__`Can't output properties`);
 				setErrored(ExitCodes.dataError);
 				return;
@@ -446,7 +445,12 @@ function onLoadDOM(dom) {
 			writeStream.write(__`Length: ${article.length}\n`);
 		}
 		if (wantedProperties.includes(Properties.dir)) {
-			writeStream.write(__`Direction: ${article.dir}\n`);
+			if (article.dir == 'ltr')
+				writeStream.write(__`Direction: ltr\n`);
+			else if (article.dir == 'rtl')
+				writeStream.write(__`Direction: rtl\n`);
+			else
+				writeStream.write(__`Direction: ${article.dir}\n`);
 		}
 		if (wantedProperties.includes(Properties.htmlTitle)) {
 			writeStream.write(`<h1>${escapeHTML(article.title, document)}</h1>\n`);
