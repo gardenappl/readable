@@ -251,10 +251,9 @@ __`   byline         Data about the page's author.\n` +
 __`   length         Length of the article in characters.\n` +
 __`   dir            Text direction, is either "ltr" for left-to-right or "rtl" for right-to-left.\n` +
 __`   text-content   Output the article's main content as plain text.\n` +
-__`   html-content   Output the article's main content as HTML.\n` +
+__`   html-content   Output the article's main content as an HTML body.\n` +
   '\n' +
-__`Properties are printed line by line, in the order specified by the user. Only "text-content" and "html-content" is printed as multiple lines.\n` +
-__`Default value is "html-title html-content".\n`)
+__`Properties are printed line by line, in the order specified by the user. Only "text-content" and "html-content" is printed as multiple lines.\n`)
 	.wrap(Math.min(yargs.terminalWidth(), 120))
 	.strict()
 	.parse();
@@ -334,14 +333,9 @@ const documentURL = args["base"] || inputURL;
 const outputJSON = args["json"];
 
 
-let wantedProperties = [];
-let wantedPropertiesCustom = false;
-
+let wantedProperties;
 if (args["properties"]) {
 	wantedProperties = args["properties"];
-	wantedPropertiesCustom = true;
-} else {
-	wantedProperties = [ "html-title", "html-content" ];
 }
 
 
@@ -414,7 +408,7 @@ function onLoadDOM(dom) {
 		} else {
 			if (!args["quiet"])
 				console.error(__`Not sure if this document should be processed. Not processing`);
-			if (args["json"] || wantedPropertiesCustom) {
+			if (args["json"] || wantedProperties) {
 				console.error(__`Can't output properties`);
 				setErrored(ExitCodes.dataError);
 				return;
@@ -434,11 +428,12 @@ function onLoadDOM(dom) {
 
 	if (!shouldParseArticle) {
 		//Ignore wantedProperties, that should've thrown an error before
-		const createDOMPurify = require("dompurify");
-		const DOMPurify = createDOMPurify(window);
 		let outputHTML = document.documentElement.outerHTML;
-		if (!args["insane"])
+		if (!args["insane"]) {
+			const createDOMPurify = require("dompurify");
+			const DOMPurify = createDOMPurify(window);
 			outputHTML = DOMPurify.sanitize(outputHTML, {WHOLE_DOCUMENT: true});
+		}
 		writeStream.write(outputHTML);
 		return;
 	}
@@ -455,7 +450,7 @@ function onLoadDOM(dom) {
 	}
 	if (outputJSON) {
 		let result = {};
-		if (wantedPropertiesCustom) {
+		if (wantedProperties) {
 			for (propertyName of wantedProperties)
 				result[propertyName] = Properties.get(propertyName)(article, false, window);
 		} else {
@@ -465,8 +460,16 @@ function onLoadDOM(dom) {
 		}
 		writeStream.write(JSON.stringify(result));
 	} else {
-		for (propertyName of wantedProperties)
-			writeStream.write(Properties.get(propertyName)(article, true, window) + '\n');
+		if (wantedProperties) {
+			for (propertyName of wantedProperties)
+				writeStream.write(Properties.get(propertyName)(article, true, window) + '\n');
+		} else {
+			writeStream.write("<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>");
+			writeStream.write(Properties.get("title")(article, false, window));
+			writeStream.write("</title></head><body>");
+			writeStream.write(Properties.get("html-content")(article, false, window));
+			writeStream.write("</body></html>");
+		}
 	}
 }
 
