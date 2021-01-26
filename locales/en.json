@@ -15,10 +15,10 @@
   "(deprecated) Interpret SOURCE as a URL rather than file name": "(deprecated) Interpret SOURCE as a URL rather than file name",
   "Output properties as a JSON payload": "Output properties as a JSON payload",
   "The --low-confidence option determines what should be done for documents where Readability can't tell what the core content is:\n": "The --low-confidence option determines what should be done for documents where Readability can't tell what the core content is:\n",
-  "   no-op   When unsure, don't touch the HTML, output as-is. This is incompatible with the --properties and --json options.\n": "   no-op   When unsure, don't touch the HTML, output as-is. This is incompatible with the --properties and --json options.\n",
+  "   keep    When unsure, don't touch the HTML, output as-is. This is incompatible with the --properties and --json options.\n": "   keep    When unsure, don't touch the HTML, output as-is. This is incompatible with the --properties and --json options.\n",
   "   force   Process the document even when unsure (may produce really bad output).\n": "   force   Process the document even when unsure (may produce really bad output).\n",
   "   exit    When unsure, exit with an error.\n": "   exit    When unsure, exit with an error.\n",
-  "Default value is \"no-op\".\n": "Default value is \"no-op\".\n",
+  "Default value is \"keep\".\n": "Default value is \"keep\".\n",
   "The --properties option accepts a list of values, separated by spaces. Suitable values are:\n": "The --properties option accepts a list of values, separated by spaces. Suitable values are:\n",
   "   title          The title of the article.\n": "   title          The title of the article.\n",
   "   html-title     The title of the article, wrapped in an <h1> tag.\n": "   html-title     The title of the article, wrapped in an <h1> tag.\n",
@@ -42,5 +42,8 @@
   "Not sure if this document should be processed, exiting": "Not sure if this document should be processed, exiting",
   "Can't output properties": "Can't output properties",
   "Couldn't process document.": "Couldn't process document.",
-  "Host not found: '%s'": "Host not found: '%s'"
+  "Host not found: '%s'": "Host not found: '%s'",
+  "Unknown mode: %s\nPlease use one of: keep, force, exit": "Unknown mode: %s\nPlease use one of: keep, force, exit",
+  "Use --help for more info.": "Use --help for more info.",
+  "Note: no-op option is deprecated, please use 'keep' instead.": "Note: no-op option is deprecated, please use 'keep' instead."
 }

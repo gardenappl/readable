@@ -15,10 +15,10 @@
   "(deprecated) Interpret SOURCE as a URL rather than file name": "(устаревшее) Интерпретировать [source] как URL, а не как файл",
   "Output properties as a JSON payload": "Показать характеристики текста в формате JSON",
   "The --low-confidence option determines what should be done for documents where Readability can't tell what the core content is:\n": "Параметр --low-confidence определяет, что следует делать, если Readability не может определить целевой контент:\n",
-  "   no-op   When unsure, don't touch the HTML, output as-is. This is incompatible with the --properties and --json options.\n": "   no-op   В случае неуверенности, не трогать HTML, выдавать как есть. Не совместимо с параметрами --properties и --json.\n",
+  "   keep    When unsure, don't touch the HTML, output as-is. This is incompatible with the --properties and --json options.\n": "   keep    В случае неуверенности, не трогать HTML, выдавать как есть. Не совместимо с параметрами --properties и --json.\n",
   "   force   Process the document even when unsure (may produce really bad output).\n": "   force   Обработать документ даже в случае неуверенности (может выдать плохой результат).\n",
   "   exit    When unsure, exit with an error.\n": "   exit    В случае неуверенности, выдать ошибку и выйти.\n",
-  "Default value is \"no-op\".\n": "По умолчанию выполняется \"no-op\".\n",
+  "Default value is \"keep\".\n": "По умолчанию выполняется \"keep\".\n",
   "The --properties option accepts a list of values, separated by spaces. Suitable values are:\n": "Параметр --properties принимает список значений (разделённых пробелами):\n",
   "   title          The title of the article.\n": "   title          Заголовок статьи.\n",
   "   html-title     The title of the article, wrapped in an <h1> tag.\n": "   html-title     Заголовок статьи в тэге <h1>.\n",
@@ -42,5 +42,8 @@
   "Not sure if this document should be processed, exiting": "Не уверен, стоит ли обрабатывать этот документ - выхожу",
   "Can't output properties": "Не могу определить характеристики",
   "Couldn't process document.": "Не удалось обработать документ.",
-  "Host not found: '%s'": "Сервер не найден: '%s'"
+  "Host not found: '%s'": "Сервер не найден: '%s'",
+  "Unknown mode: %s\nPlease use one of: keep, force, exit": "Неизвестный режим: %s\nПожалуйста, используйте один из: keep, force, exit",
+  "Use --help for more info.": "Чтобы узнать больше, воспользуйтесь --help",
+  "Note: no-op option is deprecated, please use 'keep' instead.": "Внимание: параметр no-op устаревшый, используйте вместо него 'keep'."
 }

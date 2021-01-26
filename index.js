@@ -88,7 +88,7 @@ const Properties = new Map([
 ]);
 
 const LowConfidenceMode = {
-	noOp: "no-op",
+	keep: "keep",
 	force: "force",
 	exit: "exit"
 };
@@ -162,54 +162,23 @@ let args = yargs
 		defaultCompletion();
 	})
 	.middleware([ yargsCompatProperties, yargsFixPositional ], true) //middleware seems to be buggy
-	.option("completion", {
-		type: "boolean",
-		desc: __`Print script for bash/zsh completion`
-	})
-	.option("version", {
-		alias: 'V',
-		type: "boolean",
-		desc: __`Print version`
-	})
 	.option("help", {
 		alias: 'h',
 		desc: __`Show help`
-	})
-	.option("output", {
-		alias: 'o',
-		type: "string",
-		desc: __`The file to which the result should be output`
-	})
-	.option("low-confidence", {
-		alias: 'l',
-		type: "string",
-		desc: __`What to do if Readability.js is uncertain about what the core content actually is`,
-		//default: "no-op", //don't set default because completion won't work
-		choices: ["no-op", "force", "exit"]
-	})
-	.option("properties", {
-		alias: 'p',
-		type: "array",
-		desc: __`Output specific properties of the parsed article`,
-		choices: Array.from(Properties.keys())
-	})
-	.option("quiet", {
-		alias: 'q',
-		type: "boolean",
-		desc: __`Don't output extra information to stderr`,
-		default: false 
 	})
 	.option("base", {
 		alias: 'b',
 		type: "string",
 		desc: __`Set the document URL when parsing standard input or a local file (this affects relative links)`
 	})
-	.option("url", {
-		alias: 'u',
-		type: "string",
-		desc: __`(deprecated) alias for --base`,
-		hidden: true,
-		//deprecated: true //completion script does not respect this value, so just say it in the description
+	.option("completion", {
+		type: "boolean",
+		desc: __`Print script for bash/zsh completion`
+	})
+	.option("insane", {
+		alias: 'S',
+		type: "boolean",
+		desc: __`Don't sanitize HTML`
 	})
 	.option("is-file", {
 		alias: 'f',
@@ -226,22 +195,52 @@ let args = yargs
 		hidden: true,
 		//deprecated: true
 	})
-	.option("insane", {
-		alias: 'S',
-		type: "boolean",
-		desc: __`Don't sanitize HTML`
-	})
 	.option("json", {
 		alias: 'j',
 		type: "boolean",
 		desc: __`Output properties as a JSON payload`
 	})
+	.option("low-confidence", {
+		alias: 'l',
+		type: "string",
+		desc: __`What to do if Readability.js is uncertain about what the core content actually is`,
+		//default: "no-op", //don't set default because completion won't work
+	})
+	.option("output", {
+		alias: 'o',
+		type: "string",
+		desc: __`The file to which the result should be output`
+	})
+	.option("properties", {
+		alias: 'p',
+		type: "array",
+		desc: __`Output specific properties of the parsed article`,
+		choices: Array.from(Properties.keys())
+	})
+	.option("quiet", {
+		alias: 'q',
+		type: "boolean",
+		desc: __`Don't output extra information to stderr`,
+		default: false 
+	})
+	.option("url", {
+		alias: 'u',
+		type: "string",
+		desc: __`(deprecated) alias for --base`,
+		hidden: true,
+		//deprecated: true //completion script does not respect this value, so just say it in the description
+	})
+	.option("version", {
+		alias: 'V',
+		type: "boolean",
+		desc: __`Print version`
+	})
 	.epilogue(__`The --low-confidence option determines what should be done for documents where Readability can't tell what the core content is:\n` +
-__`   no-op   When unsure, don't touch the HTML, output as-is. This is incompatible with the --properties and --json options.\n` +
+__`   keep    When unsure, don't touch the HTML, output as-is. This is incompatible with the --properties and --json options.\n` +
 __`   force   Process the document even when unsure (may produce really bad output).\n` +
 __`   exit    When unsure, exit with an error.\n` +
   '\n' +
-__`Default value is "no-op".\n` +
+__`Default value is "keep".\n` +
   '\n' +
   '\n' +
 __`The --properties option accepts a list of values, separated by spaces. Suitable values are:\n` +
@@ -261,8 +260,17 @@ __`Default value is "html-title html-content".\n`)
 	.parse();
 
 if (!args["low-confidence"]) {
-	args["low-confidence"] = LowConfidenceMode.noOp;
-	args['l'] = LowConfidenceMode.noOp;
+	args["low-confidence"] = LowConfidenceMode.keep;
+	args['l'] = LowConfidenceMode.keep;
+} else if (args["low-confidence"] == "no-op") {
+	console.error(__`Note: no-op option is deprecated, please use 'keep' instead.`);
+	args["low-confidence"] = LowConfidenceMode.keep;
+	args['l'] = LowConfidenceMode.keep;
+} else if (!Object.values(LowConfidenceMode).includes(args["low-confidence"])) {
+	console.error(__`Unknown mode: ${args["low-confidence"]}\nPlease use one of: keep, force, exit`);
+	console.error(__`Use --help for more info.`);
+	setErrored(ExitCodes.badUsageCLI);
+	process.exit();
 }
 
 if (args["is-url"]) {
