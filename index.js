@@ -22,7 +22,7 @@ Firefox Reader Mode in your terminal! CLI tool for Mozilla's Readability library
 
 const path = require("path");
 
-// GNU gettext gives preference to LANGUAGE, but this order is consistent with Yargs:
+// GNU gettext gives preference to LANGUAGE above all else, but this order is consistent with Yargs:
 const locale = (
 	process.env.LC_ALL ||
 	process.env.LC_MESSAGES ||
@@ -61,16 +61,24 @@ function setErrored(exitCode) {
 //Parsing arguments
 //
 
-const Properties = {
-	htmlTitle: "html-title",
-	title: "title",
-	excerpt: "excerpt",
-	byline: "byline",
-	length: "length",
-	dir: "dir",
-	htmlContent: "html-content",
-	textContent: "text-content"
-};
+const Properties = new Map([
+	["html-title", (article, singleLine, document) =>
+		`<h1>${escapeHTML(Properties.get('title')(article, singleLine, document), document)}</h1>`
+	],
+	["title", (article, singleLine) => 
+		singleLine ? article.title.replace(/\n+/gm, ' ') : article.title
+	],
+	["excerpt", (article, singleLine) => 
+		singleLine ? article.excerpt.replace(/\n+/gm, ' ') : article.excerpt
+	],
+	["byline", (article, singleLine) => 
+		singleLine ? article.byline.replace(/\n+/gm, ' ') : article.byline
+	],
+	["length", article => article.length],
+	["dir", article => article.dir],
+	["html-content", article => article.content],
+	["text-content", article => article.textContent]
+]);
 
 const LowConfidenceMode = {
 	noOp: "no-op",
@@ -89,7 +97,7 @@ function yargsCompatProperties(args) {
 				args["properties"].splice(i, 1, ...split);
 				continue;
 			}
-			if (!Object.values(Properties).includes(property)) {
+			if (!Properties.has(property)) {
 				args["properties"].splice(i, 1);
 				i--;
 				if (!args["--"])
@@ -124,10 +132,10 @@ let args = yargs
 		if (args["properties"] !== undefined) {
 			const properties = args["properties"];
 			let possibleProperties = [];
-			for (var possibleProperty of Object.values(Properties)) {
-				if (possibleProperty.startsWith(properties[properties.length - 1])
-						&& !properties.includes(possibleProperty))
-					possibleProperties.push(possibleProperty);
+			for (const propertyName of Properties.keys()) {
+				if (propertyName.startsWith(properties[properties.length - 1])
+						&& !properties.includes(propertyName))
+					possibleProperties.push(propertyName);
 			}
 			if (possibleProperties.length > 0)
 				done(possibleProperties);
@@ -176,7 +184,7 @@ let args = yargs
 		alias: 'p',
 		type: "array",
 		desc: __`Output specific properties of the parsed article`,
-		choices: ["html-title", "title", "excerpt", "byline", "length", "dir", "html-content", "text-content"]
+		choices: Array.from(Properties.keys())
 	})
 	.option("quiet", {
 		alias: 'q',
@@ -225,16 +233,16 @@ __`Default value is "no-op".\n` +
   '\n' +
   '\n' +
 __`The --properties option accepts a list of values, separated by spaces. Suitable values are:\n` +
-__`   html-title     Outputs the article's title, wrapped in an <h1> tag.\n` +
-__`   title          Outputs the title in the format "Title: $TITLE".\n` +
-__`   excerpt        Article description, or short excerpt from the content, in the format "Excerpt: $EXCERPT".\n` +
-__`   byline         Author metadata, in the format "Author: $AUTHOR".\n` +
-__`   length         Length of the article in characters, in the format "Length: $LENGTH".\n` +
-__`   dir            Content direction, is either "Direction: ltr" or "Direction: rtl".\n` +
-__`   html-content   Outputs the article's main content as HTML.\n` +
-__`   text-content   Outputs the article's main content as plain text.\n` +
+__`   title          The title of the article.\n` +
+__`   html-title     The title of the article, wrapped in an <h1> tag.\n` +
+__`   excerpt        Article description, or short excerpt from the content.\n` +
+__`   byline         Data about the page's author.\n` +
+__`   length         Length of the article in characters.\n` +
+__`   dir            Text direction, is either "ltr" for left-to-right or "rtl" for right-to-left.\n` +
+__`   text-content   Output the article's main content as plain text.\n` +
+__`   html-content   Output the article's main content as HTML.\n` +
   '\n' +
-__`Text-content and Html-content are mutually exclusive, and are always printed last.\n` +
+__`Properties are printed line by line, in the order specified by the user. Only "text-content" and "html-content" is printed as multiple lines.\n` +
 __`Default value is "html-title html-content".\n`)
 	.wrap(Math.min(yargs.terminalWidth(), 120))
 	.strict()
@@ -313,10 +321,8 @@ if (args["properties"]) {
 	wantedProperties = args["properties"];
 	wantedPropertiesCustom = true;
 } else {
-	wantedProperties = [ Properties.htmlTitle, Properties.htmlContent ];
+	wantedProperties = [ 'html-title', 'html-content' ];
 }
-
-
 
 
 if (errored) {
@@ -333,6 +339,9 @@ async function read(stream) {
 }
 
 
+
+const JSDOM = require("jsdom").JSDOM;
+
 if (inputIsFromStdin) {
 	if (!args["quiet"]) {
 		console.error("Reading...");
@@ -340,11 +349,9 @@ if (inputIsFromStdin) {
 			console.error(__`Warning: piping input with unknown URL. This means that relative links will be broken. Supply the --base parameter to fix.`)
 	}
 	read(process.stdin).then(result => {
-		const JSDOM = require("jsdom").JSDOM;
 		onLoadDOM(new JSDOM(result, { url: documentURL }));
 	});
 } else {
-	const JSDOM = require("jsdom").JSDOM;
 	if (!args["quiet"])
 		console.error(__`Retrieving...`);
 	let promiseGetHTML;
@@ -359,10 +366,13 @@ if (inputIsFromStdin) {
 	promiseGetHTML.then(onLoadDOM, onLoadDOMError)
 }
 
+
+
+
 const { Readability, isProbablyReaderable } = require("@mozilla/readability");
 
 //Taken from https://stackoverflow.com/a/22706073/5701177
-function escapeHTML(string, document){
+function escapeHTML(string, document) {
     var p = document.createElement("p");
     p.appendChild(document.createTextNode(string));
     return p.innerHTML;
@@ -401,68 +411,36 @@ function onLoadDOM(dom) {
 	}
 
 
-	if (shouldParseArticle) {
-		if (!args["quiet"])
-			console.error(__`Processing...`);
-
-		const reader = new Readability(document);
-		const article = reader.parse();
-		if (!article) {
-			console.error(__`Couldn't process document.`);
-			setErrored(ExitCodes.dataError);
-			return;
-		}
-		if (outputJSON) {
-			let result = {};
-			const jsonProperties = ["title", "excerpt", "byline", "length", "dir"];
-			for (jsonProperty of jsonProperties) {
-				if (!wantedPropertiesCustom || wantedProperties.includes(jsonProperty))
-					result[jsonProperty] = article[jsonProperty];
-			}
-			if (!wantedPropertiesCustom || wantedProperties.includes(Properties.textContent)) {
-				result[Properties.textContent] = article.textContent;
-			}
-			if (!wantedPropertiesCustom || wantedProperties.includes(Properties.htmlContent)) {
-				result[Properties.htmlContent] = article.content;
-			}
-			if (!wantedPropertiesCustom || wantedProperties.includes(Properties.htmlTitle)) {
-				result[Properties.htmlTitle] = `<h1>${escapeHTML(article.title, document)}</h1>`
-			}
-			writeStream.write(JSON.stringify(result));
-			return;
-		}
-
-		if (wantedProperties.includes(Properties.title)) {
-			writeStream.write(__`Title: ${article.title}\n`);
-		}
-		if (wantedProperties.includes(Properties.excerpt)) {
-			writeStream.write(__`Excerpt: ${article.excerpt}\n`);
-		}
-		if (wantedProperties.includes(Properties.byline)) {
-			writeStream.write(__`Author: ${article.byline}\n`);
-		}
-		if (wantedProperties.includes(Properties.length)) {
-			writeStream.write(__`Length: ${article.length}\n`);
-		}
-		if (wantedProperties.includes(Properties.dir)) {
-			if (article.dir == 'ltr')
-				writeStream.write(__`Direction: ltr\n`);
-			else if (article.dir == 'rtl')
-				writeStream.write(__`Direction: rtl\n`);
-			else
-				writeStream.write(__`Direction: ${article.dir}\n`);
-		}
-		if (wantedProperties.includes(Properties.htmlTitle)) {
-			writeStream.write(`<h1>${escapeHTML(article.title, document)}</h1>\n`);
-		}
-		if (wantedProperties.includes(Properties.htmlContent)) {
-			writeStream.write(article.content);
-		} else if (wantedProperties.includes(Properties.textContent)) {
-			writeStream.write(article.textContent);
-		}
-	} else {
+	if (!shouldParseArticle) {
 		//Ignore wantedProperties, that should've thrown an error before
 		writeStream.write(document.documentElement.outerHTML);
+		return;
+	}
+
+	if (!args["quiet"])
+		console.error(__`Processing...`);
+
+	const reader = new Readability(document);
+	const article = reader.parse();
+	if (!article) {
+		console.error(__`Couldn't process document.`);
+		setErrored(ExitCodes.dataError);
+		return;
+	}
+	if (outputJSON) {
+		let result = {};
+		if (wantedPropertiesCustom) {
+			for (propertyName of wantedProperties)
+				result[propertyName] = Properties.get(propertyName)(article, false, document);
+		} else {
+			for (const [name, func] of Properties) {
+				result[name] = func(article, false, document);
+			}
+		}
+		writeStream.write(JSON.stringify(result));
+	} else {
+		for (propertyName of wantedProperties)
+			writeStream.write(Properties.get(propertyName)(article, true, document) + '\n');
 	}
 }
 
