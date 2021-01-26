@@ -8,6 +8,7 @@
   "What to do if Readability.js is uncertain about what the core content actually is": "Что делать, когда Readability не может определить целевой контент",
   "Output specific properties of the parsed article": "Показать определённые характеристики текста",
   "Don't output extra information to stderr": "Не выдавать лишнюю информацию в стандартный вывод ошибок",
+  "Don't sanitize HTML": "Не убирать \"опасные\" элементы из HTML",
   "Set the document URL when parsing standard input or a local file (this affects relative links)": "Указать URL документа при чтении из локального файла или стандартного ввода (влияет на относительные ссылки)",
   "(deprecated) alias for --base": "(устаревшый) синоним для --base",
   "Interpret SOURCE as a file name rather than a URL": "Интерпретировать [source] как файл, а не как URL",

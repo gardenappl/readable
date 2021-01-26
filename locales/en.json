@@ -8,6 +8,7 @@
   "What to do if Readability.js is uncertain about what the core content actually is": "What to do if Readability.js is uncertain about what the core content actually is",
   "Output specific properties of the parsed article": "Output specific properties of the parsed article",
   "Don't output extra information to stderr": "Don't output extra information to stderr",
+  "Don't sanitize HTML": "Don't sanitize HTML",
   "Set the document URL when parsing standard input or a local file (this affects relative links)": "Set the document URL when parsing standard input or a local file (this affects relative links)",
   "(deprecated) alias for --base": "(deprecated) alias for --base",
   "Interpret SOURCE as a file name rather than a URL": "Interpret SOURCE as a file name rather than a URL",

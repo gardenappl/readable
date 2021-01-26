@@ -28,14 +28,14 @@ const locale = (
 	process.env.LC_MESSAGES ||
 	process.env.LANG ||
 	process.env.LANGUAGE ||
-	'en_US'
+	"en_US"
 ).replace(/[.:].*/, '');
 
 const yargs = require("yargs");
 const __ = require("y18n")({
 	locale: locale,
 	updateFiles: false,
-	directory: path.resolve(__dirname, 'locales')
+	directory: path.resolve(__dirname, "locales")
 }).__;
 
 //JSDOM, fs, Readability, and Readability-readerable are loaded on-demand.
@@ -62,8 +62,8 @@ function setErrored(exitCode) {
 //
 
 const Properties = new Map([
-	["html-title", (article, singleLine, document) =>
-		`<h1>${escapeHTML(Properties.get('title')(article, singleLine, document), document)}</h1>`
+	["html-title", (article, singleLine, window) =>
+		`<h1>${escapeHTML(Properties.get("title")(article, singleLine, window), window.document)}</h1>`
 	],
 	["title", (article, singleLine) => 
 		singleLine ? article.title.replace(/\n+/gm, ' ') : article.title
@@ -76,8 +76,15 @@ const Properties = new Map([
 	],
 	["length", article => article.length],
 	["dir", article => article.dir],
-	["html-content", article => article.content],
-	["text-content", article => article.textContent]
+	["text-content", article => article.textContent],
+	["html-content", (article, _, window) => {
+		if (!args["insane"]) {
+			const createDOMPurify = require("dompurify");
+			const DOMPurify = createDOMPurify(window);
+			return DOMPurify.sanitize(article.content);
+		}
+		return article.content;
+	}]
 ]);
 
 const LowConfidenceMode = {
@@ -219,6 +226,11 @@ let args = yargs
 		hidden: true,
 		//deprecated: true
 	})
+	.option("insane", {
+		alias: 'S',
+		type: "boolean",
+		desc: __`Don't sanitize HTML`
+	})
 	.option("json", {
 		alias: 'j',
 		type: "boolean",
@@ -309,9 +321,9 @@ else
 	inputFile = inputArg;
 
 
-const outputArg = args['output'];
+const outputArg = args["output"];
 const documentURL = args["base"] || inputURL;
-const outputJSON = args['json'];
+const outputJSON = args["json"];
 
 
 let wantedProperties = [];
@@ -321,7 +333,7 @@ if (args["properties"]) {
 	wantedProperties = args["properties"];
 	wantedPropertiesCustom = true;
 } else {
-	wantedProperties = [ 'html-title', 'html-content' ];
+	wantedProperties = [ "html-title", "html-content" ];
 }
 
 
@@ -335,12 +347,10 @@ async function read(stream) {
 	for await (const chunk of stream){
 		chunks.push(chunk); 
 	}
-	return Buffer.concat(chunks).toString('utf8');
+	return Buffer.concat(chunks).toString("utf8");
 }
 
 
-
-const JSDOM = require("jsdom").JSDOM;
 
 if (inputIsFromStdin) {
 	if (!args["quiet"]) {
@@ -349,11 +359,13 @@ if (inputIsFromStdin) {
 			console.error(__`Warning: piping input with unknown URL. This means that relative links will be broken. Supply the --base parameter to fix.`)
 	}
 	read(process.stdin).then(result => {
+		const JSDOM = require("jsdom").JSDOM;
 		onLoadDOM(new JSDOM(result, { url: documentURL }));
 	});
 } else {
 	if (!args["quiet"])
 		console.error(__`Retrieving...`);
+	const JSDOM = require("jsdom").JSDOM;
 	let promiseGetHTML;
 	if (inputURL) {
 		promiseGetHTML = JSDOM.fromURL(inputURL)
@@ -379,7 +391,8 @@ function escapeHTML(string, document) {
 }
 
 function onLoadDOM(dom) {
-	const document = dom.window.document;
+	const window = dom.window
+	const document = window.document;
 
 	let shouldParseArticle = true;
 	if (args["low-confidence"] != LowConfidenceMode.force)
@@ -413,7 +426,12 @@ function onLoadDOM(dom) {
 
 	if (!shouldParseArticle) {
 		//Ignore wantedProperties, that should've thrown an error before
-		writeStream.write(document.documentElement.outerHTML);
+		const createDOMPurify = require("dompurify");
+		const DOMPurify = createDOMPurify(window);
+		let outputHTML = document.documentElement.outerHTML;
+		if (!args["insane"])
+			outputHTML = DOMPurify.sanitize(outputHTML, {WHOLE_DOCUMENT: true});
+		writeStream.write(outputHTML);
 		return;
 	}
 
@@ -431,16 +449,16 @@ function onLoadDOM(dom) {
 		let result = {};
 		if (wantedPropertiesCustom) {
 			for (propertyName of wantedProperties)
-				result[propertyName] = Properties.get(propertyName)(article, false, document);
+				result[propertyName] = Properties.get(propertyName)(article, false, window);
 		} else {
 			for (const [name, func] of Properties) {
-				result[name] = func(article, false, document);
+				result[name] = func(article, false, window);
 			}
 		}
 		writeStream.write(JSON.stringify(result));
 	} else {
 		for (propertyName of wantedProperties)
-			writeStream.write(Properties.get(propertyName)(article, true, document) + '\n');
+			writeStream.write(Properties.get(propertyName)(article, true, window) + '\n');
 	}
 }
 
