@@ -394,11 +394,10 @@ function escapeHTML(string, document) {
 
 function onLoadDOM(dom) {
 	const window = dom.window
-	const document = window.document;
 
 	let shouldParseArticle = true;
 	if (args["low-confidence"] != LowConfidenceMode.force)
-		shouldParseArticle = isProbablyReaderable(document);		
+		shouldParseArticle = isProbablyReaderable(window.document);		
 
 	if (!shouldParseArticle) {
 		if (args["low-confidence"] == LowConfidenceMode.exit) {
@@ -428,24 +427,24 @@ function onLoadDOM(dom) {
 
 	if (!shouldParseArticle) {
 		//Ignore wantedProperties, that should've thrown an error before
-		let outputHTML = document.documentElement.outerHTML;
-		if (!args["insane"]) {
-			const createDOMPurify = require("dompurify");
-			const DOMPurify = createDOMPurify(window);
-			outputHTML = DOMPurify.sanitize(outputHTML, {WHOLE_DOCUMENT: true});
-		}
-		writeStream.write(outputHTML);
+		writeStream.write(getHTML(window));
 		return;
 	}
 
 	if (!args["quiet"])
 		console.error(__`Processing...`);
 
-	const reader = new Readability(document);
+	const reader = new Readability(window.document);
 	const article = reader.parse();
 	if (!article) {
-		console.error(__`Couldn't process document.`);
-		setErrored(ExitCodes.dataError);
+		if (args["low-confidence"] == LowConfidenceMode.keep) {
+			if (!args["quiet"])
+				console.error(__`Couldn't process document.`);
+			writeStream.write(getHTML(window));
+		} else {
+			console.error(__`Couldn't process document.`);
+			setErrored(ExitCodes.dataError);
+		}
 		return;
 	}
 	if (outputJSON) {
@@ -495,4 +494,14 @@ function onLoadDOMError(error) {
 //			console.error(error.stack)
 		setErrored(ExitCodes.dataError);
 	}
+}
+
+function getHTML(window) {
+	let outputHTML = window.document.documentElement.outerHTML;
+	if (!args["insane"]) {
+		const createDOMPurify = require("dompurify");
+		const DOMPurify = createDOMPurify(window);
+		outputHTML = DOMPurify.sanitize(outputHTML, {WHOLE_DOCUMENT: true});
+	}
+	return outputHTML;
 }
