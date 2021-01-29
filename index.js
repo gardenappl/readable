@@ -497,11 +497,10 @@ function onLoadDOMError(error) {
 }
 
 function getHTML(window) {
-	let outputHTML = window.document.documentElement.outerHTML;
 	if (!args["insane"]) {
 		const createDOMPurify = require("dompurify");
 		const DOMPurify = createDOMPurify(window);
-		outputHTML = DOMPurify.sanitize(outputHTML, {WHOLE_DOCUMENT: true});
+		outputHTML = DOMPurify.sanitize(window.document, {IN_PLACE: true, WHOLE_DOCUMENT: true});
 	}
 	return outputHTML;
 }
