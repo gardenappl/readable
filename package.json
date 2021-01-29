@@ -28,6 +28,6 @@
     "dompurify": "^2.2.6",
     "jsdom": "^16.4.0",
     "y18n": "^5.0.5",
-    "yargs": "github:gardenappl/yargs"
+    "@gardenapple/yargs": "^17.0.0-candidate.0"
   }
 }
