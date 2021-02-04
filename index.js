@@ -302,7 +302,6 @@ if (args["url"]) {
 	args["base"] = args["url"];
 }
 
-const proxy = args["proxy"] || process.env.HTTPS_PROXY;
 
 
 function printUsage() {
@@ -355,6 +354,8 @@ else
 const outputArg = args["output"];
 const documentURL = args["base"] || inputURL;
 const outputJSON = args["json"];
+
+const proxy = args["proxy"] || process.env.https_proxy || process.env.HTTPS_PROXY || process.env.http_proxy;
 
 
 let wantedProperties;
