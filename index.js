@@ -227,7 +227,7 @@ let args = yargs
 	.option("style", {
 		alias: 's',
 		type: "string",
-		desc: __`Specify .css file for stylesheet. If not specified, HTML will be adapted for Firefox desktop's Reader Mode.`
+		desc: __`Specify .css file for stylesheet. If not specified, HTML will be adapted for desktop Firefox's Reader Mode.`
 	})
 	.option("url", {
 		alias: 'u',
