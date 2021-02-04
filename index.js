@@ -224,6 +224,11 @@ let args = yargs
 		desc: __`Don't output extra information to stderr`,
 		default: false 
 	})
+	.option("style", {
+		alias: 's',
+		type: "string",
+		desc: __`Specify .css file for stylesheet. If not specified, HTML will be adapted for Firefox desktop's Reader Mode.`
+	})
 	.option("url", {
 		alias: 'u',
 		type: "string",
@@ -464,19 +469,63 @@ function onLoadDOM(dom) {
 			for (propertyName of wantedProperties)
 				writeStream.write(Properties.get(propertyName)(article, true, window) + '\n');
 		} else {
+			const cssHref = args["style"] || "chrome://global/skin/aboutReader.css";
+
 			writeStream.write(`<!DOCTYPE html>
 <html>
 <head>
-	<meta charset=\"utf-8\">
-	<link rel="stylesheet" href="chrome://global/skin/aboutReader.css" type="text/css">
-	<title>`);
-			writeStream.write(Properties.get("title")(article, false, window));
-			writeStream.write(`</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="${cssHref}" type="text/css">
+  <title>${escapeHTML(Properties.get("title")(article, false, window), window.document)}</title>
 </head>
-<body>
+`
+			);
 
-`);
+			if (!args["style"]) {
+				//Add a few divs and classes so that Firefox Reader Mode CSS works well
+				writeStream.write(`
+<body class="light sans-serif loaded" style="--font-size:14pt; --content-width:40em;">
+  <div class="container" `
+				);
+				const contentDir = Properties.get("dir")(article, false, window);
+				if (contentDir)
+					writeStream.write(`dir="${contentDir}">`);
+				else
+					writeStream.write('>');
+
+				writeStream.write(`
+    <div class="header reader-header reader-show-element">
+      <h1 class="reader-title">${escapeHTML(Properties.get("title")(article, false, window), window.document)}</h1>`);
+
+				const author = Properties.get("byline")(article, false, window);
+				if (author) {
+					writeStream.write(`
+      <div class="credits reader-credits">${author}</div>`);
+				}
+
+				writeStream.write(`
+    </div>
+
+    <hr>
+
+    <div class="content">
+      <div class="moz-reader-content reader-show-element">
+`
+				);
+			} else {
+				writeStream.write("\n<body>\n");
+			}
+
 			writeStream.write(Properties.get("html-content")(article, false, window));
+
+			if (!args["style"]) {
+				writeStream.write(`
+      </div>
+    </div>
+  </div>
+`
+				);
+			}
 			writeStream.write("\n</body></html>");
 		}
 	}
