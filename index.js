@@ -500,7 +500,7 @@ function onLoadDOM(dom) {
 				const author = Properties.get("byline")(article, false, window);
 				if (author) {
 					writeStream.write(`
-      <div class="credits reader-credits">${author}</div>`);
+      <div class="credits reader-credits">${escapeHTML(author, window.document)}</div>`);
 				}
 
 				writeStream.write(`
@@ -512,20 +512,27 @@ function onLoadDOM(dom) {
       <div class="moz-reader-content reader-show-element">
 `
 				);
-			} else {
-				writeStream.write("\n<body>\n");
-			}
-
-			writeStream.write(Properties.get("html-content")(article, false, window));
-
-			if (!args["style"]) {
+				writeStream.write(Properties.get("html-content")(article, false, window));
 				writeStream.write(`
       </div>
     </div>
   </div>
 `
 				);
+			} else {
+				writeStream.write(Properties.get("html-title")(article, false, window));
+				writeStream.write('\n');
+
+				const author = Properties.get("byline")(article, false, window);
+				if (author) {
+					writeStream.write(`<p><i>${escapeHTML(author, window.document)}</i></p>`);
+				}
+				writeStream.write("\n<hr>\n");
+				writeStream.write(Properties.get("html-content")(article, false, window));
+				writeStream.write("\n<body>\n");
 			}
+
+
 			writeStream.write("\n</body></html>");
 		}
 	}
