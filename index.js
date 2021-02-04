@@ -167,19 +167,25 @@ let args = yargs
 		alias: 'h',
 		desc: __`Show help`
 	})
+	.option("completion", {
+		type: "boolean",
+		desc: __`Print script for bash/zsh completion`
+	})
 	.option("base", {
 		alias: 'b',
 		type: "string",
 		desc: __`Set the document URL when parsing standard input or a local file (this affects relative links)`
 	})
-	.option("completion", {
-		type: "boolean",
-		desc: __`Print script for bash/zsh completion`
-	})
 	.option("insane", {
 		alias: 'S',
 		type: "boolean",
 		desc: __`Don't sanitize HTML`
+	})
+	.option("insecure", {
+		alias: 'K',
+		type: "boolean",
+		desc: __`Allow invalid SSL certificates`,
+		default: false
 	})
 	.option("is-file", {
 		alias: 'f',
@@ -218,6 +224,11 @@ let args = yargs
 		desc: __`Output specific properties of the parsed article`,
 		choices: Array.from(Properties.keys())
 	})
+	.option("proxy", {
+		alias: 'x',
+		type: "string",
+		desc: __`Use specified proxy (can also use HTTPS_PROXY environment variable)`
+	})
 	.option("quiet", {
 		alias: 'q',
 		type: "boolean",
@@ -235,6 +246,11 @@ let args = yargs
 		desc: __`(deprecated) alias for --base`,
 		hidden: true,
 		//deprecated: true //completion script does not respect this value, so just say it in the description
+	})
+	.option("user-agent", {
+		alias: 'A',
+		type: "string",
+		desc: __`Set custom user agent string`
 	})
 	.option("version", {
 		alias: 'V',
@@ -285,6 +301,8 @@ if (args["url"]) {
 	console.error(__`Note: --url option is deprecated, please use --base instead.`);
 	args["base"] = args["url"];
 }
+
+const proxy = args["proxy"] || process.env.HTTPS_PROXY;
 
 
 function printUsage() {
@@ -373,12 +391,21 @@ if (inputIsFromStdin) {
 } else {
 	if (!args["quiet"])
 		console.error(__`Retrieving...`);
-	const JSDOM = require("jsdom").JSDOM;
+	const jsdom = require("jsdom");
+
 	let promiseGetHTML;
 	if (inputURL) {
-		promiseGetHTML = JSDOM.fromURL(inputURL)
+		console.error(args["user-agent"]);
+		const resourceLoader = new jsdom.ResourceLoader({
+			proxy: proxy,
+			strictSSL: !args["insecure"],
+			userAgent: args["user-agent"]
+		});
+		promiseGetHTML = jsdom.JSDOM.fromURL(inputURL, {
+			resources: resourceLoader
+		});
 	} else if (inputFile) {
-		promiseGetHTML = JSDOM.fromFile(inputFile, {
+		promiseGetHTML = jsdom.JSDOM.fromFile(inputFile, {
 			url: documentURL
 		});
 	}
