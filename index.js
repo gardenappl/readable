@@ -464,11 +464,20 @@ function onLoadDOM(dom) {
 			for (propertyName of wantedProperties)
 				writeStream.write(Properties.get(propertyName)(article, true, window) + '\n');
 		} else {
-			writeStream.write("<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>");
+			writeStream.write(`<!DOCTYPE html>
+<html>
+<head>
+	<meta charset=\"utf-8\">
+	<link rel="stylesheet" href="chrome://global/skin/aboutReader.css" type="text/css">
+	<title>`);
 			writeStream.write(Properties.get("title")(article, false, window));
-			writeStream.write("</title></head><body>");
+			writeStream.write(`</title>
+</head>
+<body>
+
+`);
 			writeStream.write(Properties.get("html-content")(article, false, window));
-			writeStream.write("</body></html>");
+			writeStream.write("\n</body></html>");
 		}
 	}
 }
