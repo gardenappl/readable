@@ -396,7 +396,6 @@ if (inputIsFromStdin) {
 
 	let promiseGetHTML;
 	if (inputURL) {
-		console.error(args["user-agent"]);
 		const resourceLoader = new jsdom.ResourceLoader({
 			proxy: proxy,
 			strictSSL: !args["insecure"],
