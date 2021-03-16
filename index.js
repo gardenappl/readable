@@ -590,10 +590,11 @@ function onLoadDOMError(error) {
 }
 
 function getHTML(window) {
+	let html = window.document.documentElement.outerHTML;
 	if (!args["insane"]) {
 		const createDOMPurify = require("dompurify");
 		const DOMPurify = createDOMPurify(window);
-		outputHTML = DOMPurify.sanitize(window.document, {IN_PLACE: true, WHOLE_DOCUMENT: true});
+		return DOMPurify.sanitize(html, {IN_PLACE: true, WHOLE_DOCUMENT: true});
 	}
-	return outputHTML;
+	return html;
 }
