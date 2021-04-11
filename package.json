@@ -24,10 +24,10 @@
   ],
   "license": "GPL-3.0-only",
   "dependencies": {
-    "@gardenapple/yargs": "^17.0.0-candidate.0",
     "@mozilla/readability": "^0.4.1",
     "dompurify": "^2.2.7",
     "jsdom": "^16.5.1",
-    "y18n": "^5.0.5"
+    "y18n": "^5.0.5",
+    "yargs": "^17.0.0-candidate.11"
   }
 }

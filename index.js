@@ -31,8 +31,7 @@ const locale = (
 	"en_US"
 ).replace(/[.:].*/, '');
 
-//TODO: replace with unscoped package
-const yargs = require("@gardenapple/yargs");
+const yargs = require("yargs");
 const __ = require("y18n")({
 	locale: locale,
 	updateFiles: false,
