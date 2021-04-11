@@ -275,7 +275,7 @@ __`   text-content   Output the article's main content as plain text.\n` +
 __`   html-content   Output the article's main content as an HTML body.\n` +
   '\n' +
 __`Properties are printed line by line, in the order specified by the user. Only "text-content" and "html-content" is printed as multiple lines.\n`)
-	.wrap(Math.min(yargs.terminalWidth(), 120))
+	.wrap(Math.min(yargs.terminalWidth(), 100))
 	.strict()
 	.parse();
 
