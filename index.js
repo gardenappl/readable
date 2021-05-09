@@ -39,7 +39,6 @@ const __ = require("y18n")({
 }).__;
 
 //JSDOM, fs, Readability, and Readability-readerable are loaded on-demand.
-//To-do: lazy loading?
 
 const ExitCodes = {
 	badUsageCLI: 64,
@@ -556,6 +555,7 @@ function onLoadDOM(dom) {
 `
 				);
 			} else {
+				writeStream.write("\n<body>\n");
 				writeStream.write(Properties.get("html-title")(article, false, window));
 				writeStream.write('\n');
 
@@ -565,7 +565,6 @@ function onLoadDOM(dom) {
 				}
 				writeStream.write("\n<hr>\n");
 				writeStream.write(Properties.get("html-content")(article, false, window));
-				writeStream.write("\n<body>\n");
 			}
 
 
