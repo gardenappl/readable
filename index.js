@@ -215,7 +215,7 @@ let args = yargs
         .option("keep-classes", {
                 alias: 'C',
                 type: "boolean",
-                desc: __`Preserve all CSS classes for input elements, instead of adding custom classes`,
+                desc: __`Preserve all CSS classes for input elements, instead of adapting to Firefox's Reader Mode`,
                 default: false,
         })
 	.option("output", {
@@ -243,7 +243,7 @@ let args = yargs
 	.option("style", {
 		alias: 's',
 		type: "string",
-		desc: __`Specify .css file for stylesheet. If not specified, HTML will be adapted for desktop Firefox's Reader Mode.`
+		desc: __`Specify .css file for stylesheet`
 	})
 	.option("url", {
 		alias: 'u',

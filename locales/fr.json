@@ -11,7 +11,7 @@
   "What to do if Readability.js is uncertain about what the core content actually is": "Que faire si Readability.js est incertain du contenu principal",
   "Output specific properties of the parsed article": "Sortie des propriétés spécifiques de l'article analysé",
   "Don't output extra information to stderr": "Ne pas envoyer d'informations supplémentaires à stderr",
-  "Specify .css file for stylesheet. If not specified, HTML will be adapted for desktop Firefox's Reader Mode.": "Spécifiez le fichier .css pour la feuille de style. Si ce n'est pas spécifié, le HTML sera adapté pour le Mode Lecteur de Firefox bureau.",
+  "Specify .css file for stylesheet": "Spécifiez le fichier .css pour la feuille de style",
   "Don't sanitize HTML": "Ne pas nettoyer le HTML",
   "Set the document URL when parsing standard input or a local file (this affects relative links)": "Définir l'URL du document lors de l'analyse de l'entrée standard ou d'un fichier local (cela affecte les liens relatifs)",
   "(deprecated) alias for --base": "(obsolète) alias pour --base",
