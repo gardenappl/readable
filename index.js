@@ -93,6 +93,7 @@ const LowConfidenceMode = {
 	exit: "exit"
 };
 
+const options = {};
 
 //backwards compat with old, comma-separated values
 function yargsCompatProperties(args) { 
@@ -212,6 +213,12 @@ let args = yargs
 		desc: __`What to do if Readability.js is uncertain about what the core content actually is`,
 		//default: "no-op", //don't set default because completion won't work
 	})
+        .option("keep-classes", {
+                alias: 'C',
+                type: "boolean",
+                desc: __`Preserve all classes on HTML elements`,
+                default: false,
+        })
 	.option("output", {
 		alias: 'o',
 		type: "string",
@@ -301,6 +308,9 @@ if (args["url"]) {
 	args["base"] = args["url"];
 }
 
+if (args["keep-classes"]) {
+        options["keepClasses"] = true;
+}
 
 
 function printUsage() {
@@ -466,7 +476,7 @@ function onLoadDOM(dom) {
 	if (!args["quiet"])
 		console.error(__`Processing...`);
 
-	const reader = new Readability(window.document);
+        const reader = new Readability(window.document, options);
 	const article = reader.parse();
 	if (!article) {
 		if (args["low-confidence"] == LowConfidenceMode.keep) {
