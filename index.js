@@ -92,7 +92,7 @@ const LowConfidenceMode = {
 	exit: "exit"
 };
 
-const options = {};
+const readabilityOptions = {};
 
 //backwards compat with old, comma-separated values
 function yargsCompatProperties(args) { 
@@ -215,7 +215,7 @@ let args = yargs
         .option("keep-classes", {
                 alias: 'C',
                 type: "boolean",
-                desc: __`Preserve all classes on HTML elements`,
+                desc: __`Preserve all CSS classes for input elements, instead of adding custom classes`,
                 default: false,
         })
 	.option("output", {
@@ -308,7 +308,7 @@ if (args["url"]) {
 }
 
 if (args["keep-classes"]) {
-        options["keepClasses"] = true;
+        readabilityOptions["keepClasses"] = true;
 }
 
 
@@ -475,7 +475,7 @@ function onLoadDOM(dom) {
 	if (!args["quiet"])
 		console.error(__`Processing...`);
 
-        const reader = new Readability(window.document, options);
+        const reader = new Readability(window.document, readabilityOptions);
 	const article = reader.parse();
 	if (!article) {
 		if (args["low-confidence"] == LowConfidenceMode.keep) {
@@ -504,19 +504,22 @@ function onLoadDOM(dom) {
 			for (propertyName of wantedProperties)
 				writeStream.write(Properties.get(propertyName)(article, true, window) + '\n');
 		} else {
-			const cssHref = args["style"] || "chrome://global/skin/aboutReader.css";
-
 			writeStream.write(`<!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <link rel="stylesheet" href="${cssHref}" type="text/css">
+  <meta charset="utf-8">`);
+			if (args["style"] || !args["keep-classes"]) {
+				const cssHref = args["style"] || "chrome://global/skin/aboutReader.css";
+				writeStream.write(`
+  <link rel="stylesheet" href="${cssHref}" type="text/css">`);
+			}
+			writeStream.write(`
   <title>${escapeHTML(Properties.get("title")(article, false, window), window.document)}</title>
 </head>
 `
 			);
 
-			if (!args["style"]) {
+			if (!args["keep-classes"]) {
 				//Add a few divs and classes so that Firefox Reader Mode CSS works well
 				writeStream.write(`
 <body class="light sans-serif loaded" style="--font-size:14pt; --content-width:40em;">
