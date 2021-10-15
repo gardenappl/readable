@@ -23,7 +23,7 @@ Here is a before-and-after comparison, using [an article from The Guardian](http
 
 `npm install -g readability-cli`
 
-Note to package maintainers: it might be a good idea to provide a symlink, so the man page can be accessed either as `readability-cli(1)` or as `readable(1)`.
+(Note to package maintainers: it might be a good idea to provide a symlink, so the man page can be accessed either as `readability-cli(1)` or as `readable(1)`.)
 
 ### Arch Linux
 

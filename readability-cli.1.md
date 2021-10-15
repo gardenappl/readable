@@ -10,9 +10,9 @@
 
 This package provides the **readable** command, which uses Mozilla's Readability library. The same library is used in Firefox's Reader View.
 
-## OPTIONS
-
 The *SOURCE* can be a URL, a file, or '-' for standard input.
+
+## OPTIONS
 
 `--help`
 
@@ -107,7 +107,7 @@ As usual, exit code 0 indicates success, and anything other than 0 is an error. 
 |   **68**   | Unknown host name for URL |
 |   **77**   | Permission denied: can't read file |
 
-\* By "standard error codes" I mean "close to a standard". And by that I mean: I actually don't remember any command line tools which use this convention. You may find more info in **sysexits**(3), or maybe just *sysexits.h*.
+\* By "standard error codes" I mean "close to a standard". And by that I mean: I don't remember any command line tools which actually use this convention. You may find more info in **sysexits**(3), or maybe just *sysexits.h*.
 
 ## ENVIRONMENT
 

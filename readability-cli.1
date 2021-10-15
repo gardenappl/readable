@@ -9,9 +9,9 @@
 \fBreadability\-cli\fR takes any HTML page and strips out unnecessary bloat, leaving only the core text content\. The resulting HTML may be suitable for terminal browsers, text readers, and other uses\.
 .P
 This package provides the \fBreadable\fR command, which uses Mozilla's Readability library\. The same library is used in Firefox's Reader View\.
-.SH OPTIONS
 .P
 The \fISOURCE\fR can be a URL, a file, or '\-' for standard input\.
+.SH OPTIONS
 .P
 \fB\-\-help\fP
 .RS 0
@@ -191,7 +191,7 @@ Permission denied: can't read file
 T}
 .TE
 .P
-* By "standard error codes" I mean "close to a standard"\. And by that I mean: I actually don't remember any command line tools which use this convention\. You may find more info in \fBsysexits\fR(3), or maybe just \fIsysexits\.h\fR\|\.
+* By "standard error codes" I mean "close to a standard"\. And by that I mean: I don't remember any command line tools which actually use this convention\. You may find more info in \fBsysexits\fR(3), or maybe just \fIsysexits\.h\fR\|\.
 .SH ENVIRONMENT
 .P
 \fBreadability\-cli\fR supports localization, using the environment variables \fBLC_ALL\fP, \fBLC_MESSAGES\fP, \fBLANG\fP and \fBLANGUAGE\fP, in that order\. Only one language at a time is supported\.
