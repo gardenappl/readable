@@ -45,6 +45,7 @@ const ExitCodes = {
 	dataError: 65,
 	noInput: 66,
 	noHost: 68,
+	serviceUnavailable: 69,
 	noPermission: 77
 };
 
@@ -135,35 +136,11 @@ let args = yargs
 			type: "string"
 		});
 	})
-	.completion('--completion', false, function(current, args, defaultCompletion, done) {
-		if (args["properties"] !== undefined) {
-			const properties = args["properties"];
-			let possibleProperties = [];
-			for (const propertyName of Properties.keys()) {
-				if (propertyName.startsWith(properties[properties.length - 1])
-						&& !properties.includes(propertyName))
-					possibleProperties.push(propertyName);
-			}
-			if (possibleProperties.length > 0)
-				done(possibleProperties);
-		}
-		if (args["low-confidence"] !== undefined) {
-			const currentMode = args["low-confidence"];
-			let possibleModes = [];
-			for (var possibleMode of Object.values(LowConfidenceMode)) {
-				if (possibleMode.startsWith(currentMode)
-						&& possibleMode != currentMode)
-					possibleModes.push(possibleMode);
-					
-			}
-			if (possibleModes.length > 0)
-				done(possibleModes);
-		}
-		defaultCompletion();
-	})
+	.completion('--completion', false)
 	.middleware([ yargsCompatProperties, yargsFixPositional ], true) //middleware seems to be buggy
 	.option("help", {
 		alias: 'h',
+		type: "boolean",
 		desc: __`Show help`
 	})
 	.option("completion", {
@@ -183,8 +160,7 @@ let args = yargs
 	.option("insecure", {
 		alias: 'K',
 		type: "boolean",
-		desc: __`Allow invalid SSL certificates`,
-		default: false
+		desc: __`Allow invalid SSL certificates`
 	})
 	.option("is-file", {
 		alias: 'f',
@@ -216,8 +192,7 @@ let args = yargs
         .option("keep-classes", {
                 alias: 'C',
                 type: "boolean",
-                desc: __`Preserve all CSS classes for input elements, instead of adapting to Firefox's Reader Mode`,
-                default: false,
+                desc: __`Preserve all CSS classes for input elements, instead of adapting to Firefox's Reader Mode`
         })
 	.option("output", {
 		alias: 'o',
@@ -238,8 +213,7 @@ let args = yargs
 	.option("quiet", {
 		alias: 'q',
 		type: "boolean",
-		desc: __`Don't output extra information to stderr`,
-		default: false 
+		desc: __`Don't output extra information to stderr`
 	})
 	.option("style", {
 		alias: 's',
@@ -399,7 +373,7 @@ if (inputIsFromStdin) {
 		});
 	}
 
-	promiseGetHTML.then(onLoadDOM, onLoadDOMError)
+	promiseGetHTML.then(onLoadDOM, onLoadDOMError);
 }
 
 
@@ -558,6 +532,10 @@ function onLoadDOM(dom) {
 }
 
 function onLoadDOMError(error) {
+	if (error.error) {
+		//Nested error?
+		error = error.error;
+	}
 	if (error instanceof TypeError && inputURL) {
 		console.error(__`Invalid URL: ${inputURL}`);
 		setErrored(ExitCodes.badUsageCLI);
@@ -567,17 +545,16 @@ function onLoadDOMError(error) {
 	} else if (error.code == "EACCES") {
 		console.error(error.message);
 		setErrored(ExitCodes.noPermission);
-	} else if (error.error && error.error.code == "ENOTFOUND") {
-		console.error(__`Host not found: '${error.error.hostname}'`);
+	} else if (error.code == "ENOTFOUND") {
+		console.error(__`Host not found: ${error.hostname}`);
 		setErrored(ExitCodes.noHost);
 	} else if (error.statusCode) {
 		console.error(__`Status error: ${error.response.statusMessage}`);
-		setErrored(ExitCodes.noHost);
+		setErrored(ExitCodes.serviceUnavailable);
 	} else {
 		console.error(error.message);
-//		if (error.stack)
-//			console.error(error.stack)
-		setErrored(1);
+		//console.error(error);
+		setErrored(ExitCodes.serviceUnavailable);
 	}
 }
 

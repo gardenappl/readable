@@ -103,8 +103,9 @@ As usual, exit code 0 indicates success, and anything other than 0 is an error. 
 |     --:    |   :--   |
 |   **64**   | Bad CLI arguments |
 |   **65**   | Data format error: can't parse document using Readability. |
-|   **66**   | No input |
-|   **68**   | Unknown host name for URL |
+|   **66**   | No such file |
+|   **68**   | Host not found |
+|   **69**   | URL inaccessible |
 |   **77**   | Permission denied: can't read file |
 
 \* By "standard error codes" I mean "close to a standard". And by that I mean: I don't remember any command line tools which actually use this convention. You may find more info in **sysexits**(3), or maybe just *sysexits.h*.
