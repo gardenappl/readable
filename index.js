@@ -210,6 +210,7 @@ let args = yargs
 		alias: 'l',
 		type: "string",
 		desc: __`What to do if Readability.js is uncertain about what the core content actually is`,
+		choices: ["keep", "force", "exit"]
 		//default: "no-op", //don't set default because completion won't work
 	})
         .option("keep-classes", {
@@ -262,25 +263,7 @@ let args = yargs
 		type: "boolean",
 		desc: __`Print version`
 	})
-	.epilogue(__`The --low-confidence option determines what should be done for documents where Readability can't tell what the core content is:\n` +
-__`   keep    When unsure, don't touch the HTML, output as-is. This is incompatible with the --properties and --json options.\n` +
-__`   force   Process the document even when unsure (may produce really bad output).\n` +
-__`   exit    When unsure, exit with an error.\n` +
-  '\n' +
-__`Default value is "keep".\n` +
-  '\n' +
-  '\n' +
-__`The --properties option accepts a list of values, separated by spaces. Suitable values are:\n` +
-__`   title          The title of the article.\n` +
-__`   html-title     The title of the article, wrapped in an <h1> tag.\n` +
-__`   excerpt        Article description, or short excerpt from the content.\n` +
-__`   byline         Data about the page's author.\n` +
-__`   length         Length of the article in characters.\n` +
-__`   dir            Text direction, is either "ltr" for left-to-right or "rtl" for right-to-left.\n` +
-__`   text-content   Output the article's main content as plain text.\n` +
-__`   html-content   Output the article's main content as an HTML body.\n` +
-  '\n' +
-__`Properties are printed line by line, in the order specified by the user. Only "text-content" and "html-content" is printed as multiple lines.\n`)
+	.epilogue(__`See the manual for more info: man readable`)
 	.wrap(Math.min(yargs.terminalWidth(), 100))
 	.strict()
 	.parse();
@@ -318,10 +301,6 @@ if (args["keep-classes"]) {
 
 
 if (!args["low-confidence"]) {
-	args["low-confidence"] = LowConfidenceMode.keep;
-	args['l'] = LowConfidenceMode.keep;
-} else if (args["low-confidence"] == "no-op") {
-	console.error(__`Note: no-op option is deprecated, please use 'keep' instead.`);
 	args["low-confidence"] = LowConfidenceMode.keep;
 	args['l'] = LowConfidenceMode.keep;
 } else if (!Object.values(LowConfidenceMode).includes(args["low-confidence"])) {

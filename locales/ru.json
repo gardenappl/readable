@@ -19,21 +19,6 @@
   "(deprecated) Interpret SOURCE as a URL rather than file name": "(устаревшее) Интерпретировать [source] как URL, а не как файл",
   "Preserve all CSS classes for input elements, instead of adapting to Firefox's Reader Mode": "Оставить все CSS классы для входных элементов, и не адаптироваться под режим читателя в Firefox",
   "Output properties as a JSON payload": "Показать характеристики текста в формате JSON",
-  "The --low-confidence option determines what should be done for documents where Readability can't tell what the core content is:\n": "Параметр --low-confidence определяет, что следует делать, если Readability не может определить целевой контент:\n",
-  "   keep    When unsure, don't touch the HTML, output as-is. This is incompatible with the --properties and --json options.\n": "   keep    В случае неуверенности, не трогать HTML, выдавать как есть. Не совместимо с параметрами --properties и --json.\n",
-  "   force   Process the document even when unsure (may produce really bad output).\n": "   force   Обработать документ даже в случае неуверенности (может выдать плохой результат).\n",
-  "   exit    When unsure, exit with an error.\n": "   exit    В случае неуверенности, выдать ошибку и выйти.\n",
-  "Default value is \"keep\".\n": "По умолчанию выполняется \"keep\".\n",
-  "The --properties option accepts a list of values, separated by spaces. Suitable values are:\n": "Параметр --properties принимает список значений (разделённых пробелами):\n",
-  "   title          The title of the article.\n": "   title          Заголовок статьи.\n",
-  "   html-title     The title of the article, wrapped in an <h1> tag.\n": "   html-title     Заголовок статьи в тэге <h1>.\n",
-  "   excerpt        Article description, or short excerpt from the content.\n": "   excerpt        Описание контента, или краткий урывок из статьи.\n",
-  "   byline         Data about the page's author.\n": "   byline         Данные об авторе статьи.\n",
-  "   length         Length of the article in characters.\n": "   length         Длинна статьи (количество символов).\n",
-  "   dir            Text direction, is either \"ltr\" for left-to-right or \"rtl\" for right-to-left.\n": "   dir            Направление текста: \"ltr\" если слева направо\", \"rtl\" если справа налево.\n",
-  "   text-content   Output the article's main content as plain text.\n": "   text-content   Вывести главный контент страницы в виде обычного текста.\n",
-  "   html-content   Output the article's main content as an HTML body.\n": "   html-content   Вывести главный контент страницы в виде HTML <body>.\n",
-  "Properties are printed line by line, in the order specified by the user. Only \"text-content\" and \"html-content\" is printed as multiple lines.\n": "Эти данные выводятся в том порядке, который указал пользователь. Всё, кроме \"text-content\" и \"html-content\", выводится как одна строка.\n",
   "No input provided": "Данные не введены.",
   "Note: --is-url option is deprecated.": "Внимание: параметр --is-url устаревший.",
   "Note: --url option is deprecated, please use --base instead.": "Внимание: параметр --url устаревший, используйте вместо него --base.",
@@ -49,5 +34,5 @@
   "Host not found: '%s'": "Сервер не найден: '%s'",
   "Unknown mode: %s\nPlease use one of: keep, force, exit": "Неизвестный режим: %s\nПожалуйста, используйте один из: keep, force, exit",
   "Use --help for more info.": "Чтобы узнать больше, воспользуйтесь --help",
-  "Note: no-op option is deprecated, please use 'keep' instead.": "Внимание: параметр no-op устаревшый, используйте вместо него 'keep'."
+  "See the manual for more info: man readable": "Чтобы узнать больше, загляните в мануал: man readable"
 }

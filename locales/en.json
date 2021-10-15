@@ -19,21 +19,6 @@
   "(deprecated) Interpret SOURCE as a URL rather than file name": "(deprecated) Interpret SOURCE as a URL rather than file name",
   "Preserve all CSS classes for input elements, instead of adapting to Firefox's Reader Mode": "Preserve all CSS classes for input elements, instead of adapting to Firefox's Reader Mode",
   "Output properties as a JSON payload": "Output properties as a JSON payload",
-  "The --low-confidence option determines what should be done for documents where Readability can't tell what the core content is:\n": "The --low-confidence option determines what should be done for documents where Readability can't tell what the core content is:\n",
-  "   keep    When unsure, don't touch the HTML, output as-is. This is incompatible with the --properties and --json options.\n": "   keep    When unsure, don't touch the HTML, output as-is. This is incompatible with the --properties and --json options.\n",
-  "   force   Process the document even when unsure (may produce really bad output).\n": "   force   Process the document even when unsure (may produce really bad output).\n",
-  "   exit    When unsure, exit with an error.\n": "   exit    When unsure, exit with an error.\n",
-  "Default value is \"keep\".\n": "Default value is \"keep\".\n",
-  "The --properties option accepts a list of values, separated by spaces. Suitable values are:\n": "The --properties option accepts a list of values, separated by spaces. Suitable values are:\n",
-  "   title          The title of the article.\n": "   title          The title of the article.\n",
-  "   html-title     The title of the article, wrapped in an <h1> tag.\n": "   html-title     The title of the article, wrapped in an <h1> tag.\n",
-  "   excerpt        Article description, or short excerpt from the content.\n": "   excerpt        Article description, or short excerpt from the content.\n",
-  "   byline         Data about the page's author.\n": "   byline         Data about the page's author.\n",
-  "   length         Length of the article in characters.\n": "   length         Length of the article in characters.\n",
-  "   dir            Text direction, is either \"ltr\" for left-to-right or \"rtl\" for right-to-left.\n": "   dir            Text direction, is either \"ltr\" for left-to-right or \"rtl\" for right-to-left.\n",
-  "   text-content   Output the article's main content as plain text.\n": "   text-content   Output the article's main content as plain text.\n",
-  "   html-content   Output the article's main content as an HTML body.\n": "   html-content   Output the article's main content as an HTML body.\n",
-  "Properties are printed line by line, in the order specified by the user. Only \"text-content\" and \"html-content\" is printed as multiple lines.\n": "Properties are printed line by line, in the order specified by the user. Only \"text-content\" and \"html-content\" is printed as multiple lines.\n",
   "No input provided": "No input provided.",
   "Note: --is-url option is deprecated.": "Note: --is-url option is deprecated.",
   "Note: --url option is deprecated, please use --base instead.": "Note: --url option is deprecated, please use --base instead.",
@@ -49,5 +34,5 @@
   "Host not found: '%s'": "Host not found: '%s'",
   "Unknown mode: %s\nPlease use one of: keep, force, exit": "Unknown mode: %s\nPlease use one of: keep, force, exit",
   "Use --help for more info.": "Use --help for more info.",
-  "Note: no-op option is deprecated, please use 'keep' instead.": "Note: no-op option is deprecated, please use 'keep' instead."
+  "See the manual for more info: man readable": "See the manual for more info: man readable"
 }
