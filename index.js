@@ -318,7 +318,7 @@ function printUsage() {
 
 if (args["completion"]) {
 	yargs.showCompletionScript();
-	process.exit();
+	return;
 }
 
 
