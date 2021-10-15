@@ -1,6 +1,6 @@
 {
   "name": "readability-cli",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "description": "Firefox Reader Mode in your terminal - get useful text from a web page using Mozilla's Readability library",
   "main": "index.js",
   "bin": {
