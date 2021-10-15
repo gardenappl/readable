@@ -35,28 +35,8 @@ Arch Linux users may use the [readability-cli](https://aur.archlinux.org/package
 
 where `SOURCE` is a file, an http(s) URL, or '-' for standard input
 
-See [readable(1)](readable.1.md) for more information.
+**See [readable(1)](readable.1.md) for more information, and usage examples.**
 
-
-### Examples
-
-**Read HTML from a file and output the result to the console:**
-
-`readable index.html`
-
-**Fetch a random Wikipedia article, get its title and an excerpt:**
-
-`readable https://en.wikipedia.org/wiki/Special:Random -p title,excerpt`
-
-**Fetch a web page and read it in W3M:**
-
-`readable https://www.nytimes.com/2020/01/18/technology/clearview-privacy-facial-recognition.html | w3m -T text/html`
-
-**Download a web page using [cURL](https://en.wikipedia.org/wiki/CURL), parse it and output as JSON:**
-
-`curl https://github.com/mozilla/readability | readable --base=https://github.com/mozilla/readability --json`
-
-It's a good idea to supply the --base parameter when piping input, otherwise `readable` won't know the document's URL, and things like relative links won't work.
 
 ## Localization
 
