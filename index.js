@@ -581,7 +581,7 @@ function onLoadDOM(dom) {
 function onLoadDOMError(error) {
 	if (error instanceof TypeError && inputURL) {
 		console.error(__`Invalid URL: ${inputURL}`);
-		setErrored(ExitCodes.dataError);
+		setErrored(ExitCodes.badUsageCLI);
 	} else if (error.code == "ENOENT") {
 		console.error(error.message);
 		setErrored(ExitCodes.noInput);
@@ -598,7 +598,7 @@ function onLoadDOMError(error) {
 		console.error(error.message);
 //		if (error.stack)
 //			console.error(error.stack)
-		setErrored(ExitCodes.dataError);
+		setErrored(1);
 	}
 }
 
