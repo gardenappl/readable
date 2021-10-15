@@ -1,0 +1,238 @@
+.TH "READABILITY\-CLI" "1" "October 2021" "2.3.0" ""
+.SH "NAME"
+\fBreadability-cli\fR \- get useful text from a web page
+.SH SYNOPSYS
+.P
+\fBreadable\fR \fI[SOURCE]\fR \fI[options]\.\.\.\fR
+.SH DESCRIPTION
+.P
+\fBreadability\-cli\fR takes any HTML page and strips out unnecessary bloat, leaving only the core text content\. The resulting HTML may be suitable for terminal browsers, text readers, and other uses\.
+.P
+This package provides the \fBreadable\fR command, which uses Mozilla's Readability library\. The same library is used in Firefox's Reader View\.
+.SH OPTIONS
+.P
+The \fISOURCE\fR can be a URL, a file, or '\-' for standard input\.
+.P
+\fB\-\-help\fP
+.RS 0
+.IP \(bu 2
+Show help message, and exit\.
+
+.RE
+.P
+\fB\-b\fP, \fB\-\-base\fP \fIURL\fR
+.RS 0
+.IP \(bu 2
+Specify the document's URL\. This affects relative links: they will not work if \fBreadability\-cli\fR does not know the base URL\. You only need this option if you read HTML from a local file, or from standard input\.
+
+.RE
+.P
+\fB\-i\fP, \fB\-\-insane\fP
+.RS 0
+.IP \(bu 2
+Don't sanitize HTML\.
+
+.RE
+.P
+\fB\-K\fP, \fB\-\-insecure\fP
+.RS 0
+.IP \(bu 2
+Allow invalid SSL certificates\.
+
+.RE
+.P
+\fB\-j\fP, \fB\-\-json\fP
+.RS 0
+.IP \(bu 2
+Output all known properties of the document as JSON (see \fBProperties\fR subsection)\.
+
+.RE
+.P
+\fB\-l\fP, \fB\-\-low\-confidence\fP \fIMODE\fR
+.RS 0
+.IP \(bu 2
+What to do if Readability is uncertain about what the core content actually is\. The possible modes are:
+.RS
+.IP \(bu 2
+\fBkeep\fR \- When unsure, don't touch the HTML, output as\-is\.
+.IP \(bu 2
+\fBforce\fR \- Process the document even when unsure (may produce really bad output)\.
+.IP \(bu 2
+\fBexit\fR \- When unsure, exit with an error\.
+
+.RE
+.IP \(bu 2
+The default value is \fBkeep\fR\|\. If the \fB\-\-properties\fP or \fB\-\-json\fP options are set, the program will always run in \fBexit\fR mode\.
+
+.RE
+.P
+\fB\-C\fP, \fB\-\-keep\-classes\fP
+.RS 0
+.IP \(bu 2
+Preserve CSS classes for input elements\. By default, CSS classes are stripped, and the input is adapted for Firefox's Reader View\.
+
+.RE
+.P
+\fB\-o\fP, \fB\-\-output\fP \fIFILE\fR
+.RS 0
+.IP \(bu 2
+Output the result to FILE\.
+
+.RE
+.P
+\fB\-p\fP, \fB\-\-properties\fP \fIPROPERTIES\fR\|\.\.\.
+.RS 0
+.IP \(bu 2
+Output specific properties of the document (see \fBProperties\fR subsection)\.
+
+.RE
+.P
+\fB\-x\fP, \fB\-\-proxy\fP \fIURL\fR
+.RS 0
+.IP \(bu 2
+Use specified proxy (can also use \fBHTTPS_PROXY\fP environment variable)\.
+
+.RE
+.P
+\fB\-q\fP, \fB\-\-quiet\fP
+.RS 0
+.IP \(bu 2
+Don't print extra information\.
+
+.RE
+.P
+\fB\-s\fP, \fB\-\-style\fP
+.RS 0
+.IP \(bu 2
+Specify \fI\|\.css\fR file for stylesheet\.
+
+.RE
+.P
+\fB\-A\fP, \fB\-\-user\-agent\fP \fISTRING\fR
+.RS 0
+.IP \(bu 2
+Set custom user agent string\.
+
+.RE
+.P
+\fB\-V\fP, \fB\-\-version\fP
+.RS 0
+.IP \(bu 2
+Print \fBreadability\-cli\fR and Node\.js version, then exit\.
+
+.RE
+.P
+\fB\-\-completion\fP
+.RS 0
+.IP \(bu 2
+Print script for shell completion, and exit\. Provides Zsh completion if the current shell is zsh, otherwise provides Bash completion\.
+
+.RE
+.SS Properties
+.P
+The \fB\-\-properties\fP option accepts a list of values, separated by spaces\. Suitable values are:
+.RS 0
+.IP \(bu 2
+\fBtitle\fR \- The title of the article\.
+.IP \(bu 2
+\fBhtml\-title\fR \- The title of the article, wrapped in an \fB<h1>\fP tag\.
+.IP \(bu 2
+\fBexcerpt\fR \- Article description, or short excerpt from the content\.
+.IP \(bu 2
+\fBbyline\fR \- Data about the page's author\.
+.IP \(bu 2
+\fBlength\fR \- Length of the article in characters\.
+.IP \(bu 2
+\fBdir\fR \- Text direction, is either "ltr" for left\-to\-right or "rtl" for right\-to\-left\.
+.IP \(bu 2
+\fBtext\-content\fR \- Output the article's main content as plain text\.
+.IP \(bu 2
+\fBhtml\-content\fR \- Output the article's main content as an HTML body\.
+
+.RE
+.P
+Properties are printed line by line, in the order specified by the user\. Only "text\-content" and "html\-content" is printed as multiple lines\.
+.SH EXIT STATUS
+.P
+As usual, exit code 0 indicates success, and anything other than 0 is an error\. \fBreadability\-cli\fR uses standard\fB*\fP error codes:
+.TS
+tab(|) expand nowarn box;
+ l l.
+T{
+Error code
+T}|T{
+Meaning
+T}
+_
+T{
+\fB64\fR
+T}|T{
+Bad CLI arguments
+T}
+T{
+\fB65\fR
+T}|T{
+Data format error: can't parse document using Readability\.
+T}
+T{
+\fB66\fR
+T}|T{
+No input
+T}
+T{
+\fB68\fR
+T}|T{
+Unknown host name for URL
+T}
+T{
+\fB77\fR
+T}|T{
+Permission denied: can't read file
+T}
+.TE
+.P
+\fB*\fP By "standard error codes" I mean "close to a standard"\. And by that I mean: I actually don't remember any command line tools which use this convention\. You may find more info in \fBsysexits\fR(3), or maybe just \fIsysexits\.h\fR\|\.
+.SH ENVIRONMENT
+.P
+\fBreadability\-cli\fR supports localization, using the environment variables \fBLC_ALL\fP, \fBLC_MESSAGES\fP, \fBLANG\fP and \fBLANGUAGE\fP, in that order\. Only one language at a time is supported\.
+.P
+\fBHTTPS_PROXY\fP will set the HTTPS proxy, as previously stated, however the \fB\-\-proxy\fP option overrides this\. Lowercase \fBhttps_proxy\fP and \fBhttp_proxy\fP are also recognized\.
+.SH EXAMPLE
+.P
+\fBRead HTML from a file and output the result to the console:\fR
+.P
+.RS 2
+.nf
+readable index\.html
+.fi
+.RE
+.P
+\fBFetch a random Wikipedia article, get its title and an excerpt:\fR
+.P
+.RS 2
+.nf
+readable https://en\.wikipedia\.org/wiki/Special:Random \-p title,excerpt
+.fi
+.RE
+.P
+\fBFetch a web page and read it in W3M:\fR
+.P
+.RS 2
+.nf
+readable https://www\.nytimes\.com/2020/01/18/technology/clearview\-privacy\-facial\-recognition\.html | w3m \-T text/html
+.fi
+.RE
+.P
+\fBDownload a web page using cURL, parse it and output as JSON:\fR
+.P
+.RS 2
+.nf
+curl https://github\.com/mozilla/readability | readable \-\-base=https://github\.com/mozilla/readability \-\-json
+.fi
+.RE
+.SH SEE ALSO
+.P
+\fBcurl\fR(1), \fBw3m\fR(1), \fBsysexits\fR(3)
+.P
+Source code, license, bug tracker and merge requests may be found on GitLab \fIhttps://gitlab\.com/gardenappl/readability\-cli\fR\|\.
+
