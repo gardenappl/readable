@@ -285,30 +285,12 @@ __`Properties are printed line by line, in the order specified by the user. Only
 	.strict()
 	.parse();
 
-if (!args["low-confidence"]) {
-	args["low-confidence"] = LowConfidenceMode.keep;
-	args['l'] = LowConfidenceMode.keep;
-} else if (args["low-confidence"] == "no-op") {
-	console.error(__`Note: no-op option is deprecated, please use 'keep' instead.`);
-	args["low-confidence"] = LowConfidenceMode.keep;
-	args['l'] = LowConfidenceMode.keep;
-} else if (!Object.values(LowConfidenceMode).includes(args["low-confidence"])) {
-	console.error(__`Unknown mode: ${args["low-confidence"]}\nPlease use one of: keep, force, exit`);
-	console.error(__`Use --help for more info.`);
-	setErrored(ExitCodes.badUsageCLI);
-	process.exit();
-}
-
 if (args["is-url"]) {
 	console.error(__`Note: --is-url option is deprecated.`);
 }
 if (args["url"]) {
 	console.error(__`Note: --url option is deprecated, please use --base instead.`);
 	args["base"] = args["url"];
-}
-
-if (args["keep-classes"]) {
-        readabilityOptions["keepClasses"] = true;
 }
 
 
@@ -322,12 +304,32 @@ if (args["completion"]) {
 }
 
 
-if (args.version) {
+if (args["version"]) {
 	console.log(`readability-cli v${require("./package.json").version}`);
 	console.log(`Node.js ${process.version}`);
 	return;
 }
 
+
+
+if (args["keep-classes"]) {
+        readabilityOptions["keepClasses"] = true;
+}
+
+
+if (!args["low-confidence"]) {
+	args["low-confidence"] = LowConfidenceMode.keep;
+	args['l'] = LowConfidenceMode.keep;
+} else if (args["low-confidence"] == "no-op") {
+	console.error(__`Note: no-op option is deprecated, please use 'keep' instead.`);
+	args["low-confidence"] = LowConfidenceMode.keep;
+	args['l'] = LowConfidenceMode.keep;
+} else if (!Object.values(LowConfidenceMode).includes(args["low-confidence"])) {
+	console.error(__`Unknown mode: ${args["low-confidence"]}\nPlease use one of: keep, force, exit`);
+	console.error(__`Use --help for more info.`);
+	setErrored(ExitCodes.badUsageCLI);
+	return;
+}
 
 
 let inputArg;
