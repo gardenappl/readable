@@ -8,9 +8,11 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "man": "marked-man --version=\"$(node -p 'require(\"./package.json\").version')\" readable.1.md > readable.1"
+    "man": "marked-man --version=\"v$(node -p 'require(\"./package.json\").version')\" readability-cli.1.md > readability-cli.1"
   },
-  "man": "./readable.1",
+  "man": [
+    "./readability-cli.1"
+  ],
   "repository": "gitlab:gardenappl/readability-cli",
   "author": "gardenapple <gardenapple@posteo.net>",
   "bugs": "https://gitlab.com/gardenappl/readability-cli/-/issues",

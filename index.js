@@ -263,7 +263,7 @@ let args = yargs
 		type: "boolean",
 		desc: __`Print version`
 	})
-	.epilogue(__`See the manual for more info: man readable`)
+	.epilogue(__`See the manual for more info: man readability-cli`)
 	.wrap(Math.min(yargs.terminalWidth(), 100))
 	.strict()
 	.parse();

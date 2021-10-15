@@ -23,6 +23,8 @@ Here is a before-and-after comparison, using [an article from The Guardian](http
 
 `npm install -g readability-cli`
 
+Note to package maintainers: it might be a good idea to provide a symlink, so the man page can be accessed either as `readability-cli(1)` or as `readable(1)`.
+
 ### Arch Linux
 
 Arch Linux users may use the [readability-cli](https://aur.archlinux.org/packages/readability-cli/) AUR package instead.
@@ -35,7 +37,7 @@ Arch Linux users may use the [readability-cli](https://aur.archlinux.org/package
 
 where `SOURCE` is a file, an http(s) URL, or '-' for standard input
 
-**See [readable(1)](readable.1.md) for more information, and usage examples.**
+**See [readability-cli(1)](readability-cli.1.md) for more information, and usage examples.**
 
 
 ## Localization
