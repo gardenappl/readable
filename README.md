@@ -35,7 +35,7 @@ Arch Linux users may use the [readability-cli](https://aur.archlinux.org/package
 
 where `SOURCE` is a file, an http(s) URL, or '-' for standard input
 
-See `readable --help` for more information.
+See [readable(1)](readable.1.md) for more information.
 
 
 ### Examples
