@@ -369,7 +369,9 @@ if (inputIsFromStdin) {
 		});
 	} else if (inputFile) {
 		promiseGetHTML = jsdom.JSDOM.fromFile(inputFile, {
-			url: documentURL
+			url: documentURL,
+			// workaround for https://gitlab.com/gardenappl/readability-cli/-/issues/9
+			contentType: "text/html; charset=utf-8"
 		});
 	}
 
