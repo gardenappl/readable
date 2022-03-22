@@ -34,5 +34,6 @@
   "Host not found: '%s'": "Host not found: '%s'",
   "Unknown mode: %s\nPlease use one of: keep, force, exit": "Unknown mode: %s\nPlease use one of: keep, force, exit",
   "Use --help for more info.": "Use --help for more info.",
-  "See the manual for more info: man readability-cli": "See the manual for more info: man readability-cli"
+  "See the manual for more info: man readability-cli": "See the manual for more info: man readability-cli",
+  "Error: option --%s is not supported in Deno.": "Error: option --%s is not supported in Deno."
 }

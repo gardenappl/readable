@@ -28,7 +28,7 @@ The *SOURCE* can be a URL, a file, or '-' for standard input.
 
 `-K`, `--insecure`
 
-* Allow invalid SSL certificates.
+* (Node.js version only) Allow invalid SSL certificates.
 
 `-j`, `--json`
 
@@ -58,7 +58,7 @@ The *SOURCE* can be a URL, a file, or '-' for standard input.
 
 `-x`, `--proxy` *URL*
 
-* Use specified proxy (can also use `HTTPS_PROXY` environment variable).
+* (Node.js version only) Use specified proxy. Node.js and Deno can also use `HTTPS_PROXY` environment variable.
 
 `-q`, `--quiet`
 
@@ -114,7 +114,7 @@ As usual, exit code 0 indicates success, and anything other than 0 is an error. 
 
 **readability-cli** supports localization, using the environment variables `LC_ALL`, `LC_MESSAGES`, `LANG` and `LANGUAGE`, in that order. Only one language at a time is supported.
 
-`HTTPS_PROXY` will set the HTTPS proxy, as previously stated, however the `--proxy` option overrides this. Lowercase `https_proxy` and `http_proxy` are also recognized.
+`HTTPS_PROXY` will set the HTTPS proxy, as previously stated, however the `--proxy` option overrides this. Node.js also recognizes  lowercase `https_proxy` and `http_proxy`, for compatibility with `curl`.
 
 ## EXAMPLE
 

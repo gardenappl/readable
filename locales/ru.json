@@ -34,5 +34,6 @@
   "Host not found: '%s'": "Сервер не найден: '%s'",
   "Unknown mode: %s\nPlease use one of: keep, force, exit": "Неизвестный режим: %s\nПожалуйста, используйте один из: keep, force, exit",
   "Use --help for more info.": "Чтобы узнать больше, воспользуйтесь --help",
-  "See the manual for more info: man readability-cli": "Чтобы узнать больше, загляните в мануал: man readability-cli"
+  "See the manual for more info: man readability-cli": "Чтобы узнать больше, загляните в мануал: man readability-cli",
+  "Error: option --%s is not supported in Deno.": "Ошибка: параметр --%s не поддерживается в Deno."
 }
