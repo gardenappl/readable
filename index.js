@@ -59,11 +59,11 @@ async function parseDOMFromURL(url, proxy, strictSSL, userAgent) {
 
 	const dom = await JSDOM.fromURL(url, {
 		resources: resourceLoader
-	})
+	});
 	return [dom.window.document, dom.window];
 }
 
-async function parseDOM(html, url) {
+function parseDOM(html, url) {
 	const { JSDOM } = require("jsdom");
 	const dom = new JSDOM(html, { url: url });
 	return [dom.window.document, dom.window];
@@ -75,17 +75,17 @@ async function parseDOMFromFile(file, url) {
 		url: url,
 		// workaround for https://gitlab.com/gardenappl/readability-cli/-/issues/9
 		contentType: "text/html; charset=utf-8"
-	})
+	});
 	return [dom.window.document, dom.window];
 }
 
-async function sanitizeHTML(html, window) {
+function sanitizeHTML(html, window) {
 	const createDOMPurify = require("dompurify");
 	const DOMPurify = createDOMPurify(window);
 	return DOMPurify.sanitize(html);
 }
 
-async function sanitizeDOM(document, window) {
+function sanitizeDOM(document, window) {
 	const createDOMPurify = require("dompurify");
 	const DOMPurify = createDOMPurify(window);
 	DOMPurify.sanitize(document, {IN_PLACE: true, WHOLE_DOCUMENT: true});

@@ -54,8 +54,8 @@ export default async function(
 	//
 
 	const Properties = new Map([
-		["html-title", (article, singleLine, window) =>
-			`<h1>${escapeHTML(Properties.get("title")(article, singleLine, window), window.document)}</h1>`
+		["html-title", (article, singleLine, document) =>
+			`<h1>${escapeHTML(Properties.get("title")(article, singleLine, document), document)}</h1>`
 		],
 		["title", (article, singleLine) => 
 			singleLine ? article.title.replace(/\n+/gm, ' ') : article.title
@@ -69,7 +69,7 @@ export default async function(
 		["length", article => article.length],
 		["dir", article => article.dir],
 		["text-content", article => article.textContent],
-		["html-content", (article, _, window) => article.content]
+		["html-content", article => article.content]
 	]);
 
 	const LowConfidenceMode = {
@@ -83,7 +83,8 @@ export default async function(
 	//backwards compat with old, comma-separated values
 	function yargsCompatProperties(args) { 
 		if (args["properties"]) {
-			for (var i = 0; i < args["properties"].length; i++) {
+			let i;
+			for (i = 0; i < args["properties"].length; i++) {
 				const property = args["properties"][i];
 				if (property.indexOf(',') > -1) {
 					const split = args["properties"][i].split(',');
@@ -113,7 +114,7 @@ export default async function(
 	}
 
 
-	let args = yargs
+	const args = yargs
 		.version(false)
 		.command("* [source]", __`Process HTML input`, (yargs) => { 
 			yargs.positional("source", {
@@ -224,7 +225,7 @@ export default async function(
 			type: "boolean",
 			desc: __`Print version`
 		})
-		.fail((msg, err, yargs) => {
+		.fail((msg, _err, _yargs) => {
 			console.error(msg);
 			setErrored(ExitCodes.badUsageCLI);
 		})
@@ -352,7 +353,7 @@ export default async function(
 					console.error(__`Warning: piping input with unknown URL. This means that relative links will be broken. Supply the --base parameter to fix.`)
 			}
 			const input = await read(process.stdin);
-			[document, window] = await parseDOM(result, documentURL);
+			[document, window] = await parseDOM(input, documentURL);
 		} else {
 			if (!args["quiet"])
 				console.error(__`Retrieving...`);
@@ -365,7 +366,8 @@ export default async function(
 			}
 			[document, window] = await parseDOMPromise;
 		}
-	} catch (error) {
+	} catch (e) {
+		let error = e
 		if (error.error) {
 			//Nested error?
 			error = error.error;
@@ -397,7 +399,7 @@ export default async function(
 
 	//Taken from https://stackoverflow.com/a/22706073/5701177
 	function escapeHTML(string, document) {
-	    var p = document.createElement("p");
+	    const p = document.createElement("p");
 	    p.appendChild(document.createTextNode(string));
 	    return p.innerHTML;
 	}
@@ -461,10 +463,10 @@ export default async function(
 		return;
 	}
 	if (outputJSON) {
-		let result = {};
+		const result = {};
 		if (wantedProperties) {
 			for (propertyName of wantedProperties)
-				result[propertyName] = Properties.get(propertyName)(article, false, window);
+				result[propertyName] = Properties.get(propertyName)(article, false, document);
 		} else {
 			for (const [name, func] of Properties) {
 				result[name] = func(article, false, window);
@@ -474,7 +476,7 @@ export default async function(
 	} else {
 		if (wantedProperties) {
 			for (propertyName of wantedProperties)
-				writeStream.write(Properties.get(propertyName)(article, true, window) + '\n');
+				writeStream.write(Properties.get(propertyName)(article, true, document) + '\n');
 		} else {
 			writeStream.write(`<!DOCTYPE html>
 <html>
@@ -486,7 +488,7 @@ export default async function(
   <link rel="stylesheet" href="${cssHref}" type="text/css">`);
 			}
 			writeStream.write(`
-  <title>${escapeHTML(Properties.get("title")(article, false, window), document)}</title>
+  <title>${escapeHTML(Properties.get("title")(article, false, document), document)}</title>
 </head>
 `
 			);
@@ -497,7 +499,7 @@ export default async function(
 <body class="light sans-serif loaded" style="--font-size:14pt; --content-width:40em;">
   <div class="container" `
 				);
-				const contentDir = Properties.get("dir")(article, false, window);
+				const contentDir = Properties.get("dir")(article, false, document);
 				if (contentDir)
 					writeStream.write(`dir="${contentDir}">`);
 				else
@@ -505,9 +507,9 @@ export default async function(
 
 				writeStream.write(`
     <div class="header reader-header reader-show-element">
-      <h1 class="reader-title">${escapeHTML(Properties.get("title")(article, false, window), document)}</h1>`);
+      <h1 class="reader-title">${escapeHTML(Properties.get("title")(article, false, document), document)}</h1>`);
 
-				const author = Properties.get("byline")(article, false, window);
+				const author = Properties.get("byline")(article, false, document);
 				if (author) {
 					writeStream.write(`
       <div class="credits reader-credits">${escapeHTML(author, document)}</div>`);
@@ -522,7 +524,7 @@ export default async function(
       <div class="moz-reader-content reader-show-element">
 `
 				);
-				const html = Properties.get("html-content")(article, false, window);
+				const html = Properties.get("html-content")(article, false, document);
 				if (!args["insane"])
 					writeStream.write(await sanitizeHTML(html, window));
 				else
@@ -535,15 +537,15 @@ export default async function(
 				);
 			} else {
 				writeStream.write("\n<body>\n");
-				writeStream.write(Properties.get("html-title")(article, false, window));
+				writeStream.write(Properties.get("html-title")(article, false, document));
 				writeStream.write('\n');
 
-				const author = Properties.get("byline")(article, false, window);
+				const author = Properties.get("byline")(article, false, document);
 				if (author) {
 					writeStream.write(`<p><i>${escapeHTML(author, document)}</i></p>`);
 				}
 				writeStream.write("\n<hr>\n");
-				const html = Properties.get("html-content")(article, false, window);
+				const html = Properties.get("html-content")(article, false, document);
 				if (!args["insane"])
 					writeStream.write(await sanitizeHTML(html, window));
 				else

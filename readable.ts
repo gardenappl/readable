@@ -38,7 +38,7 @@ function printVersion() {
 	console.log(`Deno ${Deno.version.deno}`)
 }
 
-async function parseDOMFromURL(url: string, proxy?: string, strictSSL?: boolean, userAgent?: string) {
+async function parseDOMFromURL(url: string, _proxy: string, _strictSSL: boolean, userAgent: string) {
 	const initParserPromise = initParser()
 
 	const userAgentString = userAgent ?? new UserAgent({ deviceCategory: "desktop" }).toString()
@@ -67,22 +67,22 @@ async function parseDOMFromURL(url: string, proxy?: string, strictSSL?: boolean,
 
 async function parseDOM(html: string, url?: string, mimeType?: DOMParserMimeType) {
 	await initParser()
-	const document = new DOMParser().parseFromString(html, mimeType ?? "text/html")!!
+	const document = new DOMParser().parseFromString(html, mimeType ?? "text/html")!
 
 	const baseURLString = document.getElementsByTagName("base")[0]?.getAttribute("href") ?? url
 	if (baseURLString) {
 		const baseURL = new URL(baseURLString)
 		const nodes: Element[] = []
-		nodes.push(document.documentElement!!)
+		nodes.push(document.documentElement!)
 
 		while (nodes.length > 0) {
-			const element = nodes.pop()!!
+			const element = nodes.pop()!
 			const href = element.getAttribute("href")
 			if (href) {
 				try {
 					// Try to parse absolute URL
 					new URL(href)
-				} catch (e) {
+				} catch {
 					// Assume href is a relative URL
 					element.setAttribute("href", new URL(href, baseURL))
 				}
@@ -105,7 +105,7 @@ async function sanitizeHTML(html: string) {
 }
 
 async function sanitizeDOM(document: Document) {
-	return sanitizeHTML(document.documentElement!.outerHTML)
+	return await sanitizeHTML(document.documentElement!.outerHTML)
 }
 
 
