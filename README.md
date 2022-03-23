@@ -19,15 +19,44 @@ Here is a before-and-after comparison, using [an article from The Guardian](http
 
 ## Installation
 
-**readability-cli** can be installed on any system with [Node.js](https://nodejs.org/en/):
+**readability-cli** can run via either [Node.js](https://nodejs.org/en/) or its newer and safer Rust counterpart [Deno](https://deno.land/).
+
+### Node.js
+
+Install the program and its man page:
 
 `npm install -g readability-cli`
 
-(Note to package maintainers: it might be a good idea to provide a symlink, so the man page can be accessed either as `readability-cli(1)` or as `readable(1)`.)
+*(Note to package maintainers: it might be a good idea to provide a symlink, so the man page can be accessed either as `readability-cli(1)` or as `readable(1)`)*
+
+### Deno
+
+Deno support is still in development, running the script directly with `deno run <URL>` is not supported.
+
+However, you can clone this Git repository and easily run the `readable.ts` script.
+
+```sh
+git clone https://gitlab.com/gardenappl/readability-cli/
+cd readability-cli
+./readable.ts
+```
+
+You can use `deno run` with the locally-downloaded script to fine-tune permissions, for example:
+
+`curl https://example.com | deno run --no-check readable.ts`
+
+By default Deno does not allow reading & writing files or accessing the network, meaning you have to rely on piping data in and out.
+
+Read more about Deno permissions [in their manual](https://deno.land/manual/getting_started/permissions).
+
+*(Package maintainers might consider adding a `readable-sandbox` executable which will run `readable` with restrictions)*
 
 ### Arch Linux
 
-Arch Linux users may use the [readability-cli](https://aur.archlinux.org/packages/readability-cli/) AUR package instead.
+Arch Linux users may use the "official" AUR packages:
+
+* [nodejs-readability-cli](https://aur.archlinux.org/packages/nodejs-readability-cli/)
+* [deno-readability-cli](https://aur.archlinux.org/packages/deno-readability-cli/)
 
 ## Usage
 
