@@ -465,7 +465,7 @@ export default async function(
 	if (outputJSON) {
 		const result = {};
 		if (wantedProperties) {
-			for (propertyName of wantedProperties)
+			for (const propertyName of wantedProperties)
 				result[propertyName] = Properties.get(propertyName)(article, false, document);
 		} else {
 			for (const [name, func] of Properties) {
@@ -475,7 +475,7 @@ export default async function(
 		writeStream.write(JSON.stringify(result));
 	} else {
 		if (wantedProperties) {
-			for (propertyName of wantedProperties)
+			for (const propertyName of wantedProperties)
 				writeStream.write(Properties.get(propertyName)(article, true, document) + '\n');
 		} else {
 			writeStream.write(`<!DOCTYPE html>
