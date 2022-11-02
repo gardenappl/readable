@@ -22,7 +22,7 @@ The *SOURCE* can be a URL, a file, or '-' for standard input.
 
 * Specify the document's URL. This affects relative links: they will not work if **readability-cli** does not know the base URL. You only need this option if you read HTML from a local file, or from standard input.
 
-`-i`, `--insane`
+`-S`, `--insane`
 
 * Don't sanitize HTML.
 

@@ -51,6 +51,21 @@ Read more about Deno permissions [in their manual](https://deno.land/manual/gett
 
 *(Package maintainers might consider adding a `readable-sandbox` executable which will run `readable` with restrictions)*
 
+### Bun
+
+[Bun](https://bun.sh/) is an experimental JavaScript runtime which is supposedly a faster alternative to Node.js. `readability-cli` has not been thoroughly tested with it, but you can try to run:
+
+```sh
+bun install readability-cli
+bun run readable
+```
+
+...or you can clone this repository and run
+
+```sh
+bun run ./index.js
+```
+
 ### Arch Linux
 
 Arch Linux users may use the "official" AUR packages:
