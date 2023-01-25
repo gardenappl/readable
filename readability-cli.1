@@ -1,4 +1,4 @@
-.TH "READABILITY\-CLI" "1" "November 2022" "v2.4.1" ""
+.TH "READABILITY\-CLI" "1" "January 2023" "v2.4.3"
 .SH "NAME"
 \fBreadability-cli\fR \- get useful text from a web page
 .SH SYNOPSYS
@@ -14,45 +14,52 @@ The \fISOURCE\fR can be a URL, a file, or '\-' for standard input\.
 .SH OPTIONS
 .P
 \fB\-\-help\fP
-.RS 0
+
+.RS 1
 .IP \(bu 2
 Show help message, and exit\.
 
 .RE
 .P
 \fB\-b\fP, \fB\-\-base\fP \fIURL\fR
-.RS 0
+
+.RS 1
 .IP \(bu 2
 Specify the document's URL\. This affects relative links: they will not work if \fBreadability\-cli\fR does not know the base URL\. You only need this option if you read HTML from a local file, or from standard input\.
 
 .RE
 .P
 \fB\-S\fP, \fB\-\-insane\fP
-.RS 0
+
+.RS 1
 .IP \(bu 2
 Don't sanitize HTML\.
 
 .RE
 .P
 \fB\-K\fP, \fB\-\-insecure\fP
-.RS 0
+
+.RS 1
 .IP \(bu 2
 (Node\.js version only) Allow invalid SSL certificates\.
 
 .RE
 .P
 \fB\-j\fP, \fB\-\-json\fP
-.RS 0
+
+.RS 1
 .IP \(bu 2
 Output all known properties of the document as JSON (see \fBProperties\fR subsection)\.
 
 .RE
 .P
 \fB\-l\fP, \fB\-\-low\-confidence\fP \fIMODE\fR
-.RS 0
+
+.RS 1
 .IP \(bu 2
 What to do if Readability is uncertain about what the core content actually is\. The possible modes are:
-.RS
+
+.RS 1
 .IP \(bu 2
 \fBkeep\fR \- When unsure, don't touch the HTML, output as\-is\.
 .IP \(bu 2
@@ -67,63 +74,72 @@ The default value is \fBkeep\fR\|\. If the \fB\-\-properties\fP or \fB\-\-json\f
 .RE
 .P
 \fB\-C\fP, \fB\-\-keep\-classes\fP
-.RS 0
+
+.RS 1
 .IP \(bu 2
 Preserve CSS classes for input elements\. By default, CSS classes are stripped, and the input is adapted for Firefox's Reader View\.
 
 .RE
 .P
 \fB\-o\fP, \fB\-\-output\fP \fIFILE\fR
-.RS 0
+
+.RS 1
 .IP \(bu 2
 Output the result to FILE\.
 
 .RE
 .P
 \fB\-p\fP, \fB\-\-properties\fP \fIPROPERTIES\fR\|\.\.\.
-.RS 0
+
+.RS 1
 .IP \(bu 2
 Output specific properties of the document (see \fBProperties\fR subsection)\.
 
 .RE
 .P
 \fB\-x\fP, \fB\-\-proxy\fP \fIURL\fR
-.RS 0
+
+.RS 1
 .IP \(bu 2
 (Node\.js version only) Use specified proxy\. Node\.js and Deno can also use \fBHTTPS_PROXY\fP environment variable\.
 
 .RE
 .P
 \fB\-q\fP, \fB\-\-quiet\fP
-.RS 0
+
+.RS 1
 .IP \(bu 2
 Don't print extra information\.
 
 .RE
 .P
 \fB\-s\fP, \fB\-\-style\fP
-.RS 0
+
+.RS 1
 .IP \(bu 2
 Specify \fI\|\.css\fR file for stylesheet\.
 
 .RE
 .P
 \fB\-A\fP, \fB\-\-user\-agent\fP \fISTRING\fR
-.RS 0
+
+.RS 1
 .IP \(bu 2
 Set custom user agent string\.
 
 .RE
 .P
 \fB\-V\fP, \fB\-\-version\fP
-.RS 0
+
+.RS 1
 .IP \(bu 2
 Print \fBreadability\-cli\fR and Node\.js version, then exit\.
 
 .RE
 .P
 \fB\-\-completion\fP
-.RS 0
+
+.RS 1
 .IP \(bu 2
 Print script for shell completion, and exit\. Provides Zsh completion if the current shell is zsh, otherwise provides Bash completion\.
 
@@ -131,7 +147,8 @@ Print script for shell completion, and exit\. Provides Zsh completion if the cur
 .SS Properties
 .P
 The \fB\-\-properties\fP option accepts a list of values, separated by spaces\. Suitable values are:
-.RS 0
+
+.RS 1
 .IP \(bu 2
 \fBtitle\fR \- The title of the article\.
 .IP \(bu 2
@@ -157,38 +174,43 @@ Properties are printed line by line, in the order specified by the user\. Only "
 As usual, exit code 0 indicates success, and anything other than 0 is an error\. \fBreadability\-cli\fR uses standard* error codes:
 .TS
 tab(|) expand nowarn box;
- l l.
+r l.
 T{
 Error code
 T}|T{
 Meaning
 T}
-_
+=
 T{
 \fB64\fR
 T}|T{
 Bad CLI arguments
 T}
+_
 T{
 \fB65\fR
 T}|T{
 Data format error: can't parse document using Readability\.
 T}
+_
 T{
 \fB66\fR
 T}|T{
 No such file
 T}
+_
 T{
 \fB68\fR
 T}|T{
 Host not found
 T}
+_
 T{
 \fB69\fR
 T}|T{
 URL inaccessible
 T}
+_
 T{
 \fB77\fR
 T}|T{
@@ -205,7 +227,6 @@ T}
 .SH EXAMPLE
 .P
 \fBRead HTML from a file and output the result to the console:\fR
-.P
 .RS 2
 .nf
 readable index\.html
@@ -213,7 +234,6 @@ readable index\.html
 .RE
 .P
 \fBFetch a random Wikipedia article, get its title and an excerpt:\fR
-.P
 .RS 2
 .nf
 readable https://en\.wikipedia\.org/wiki/Special:Random \-p title,excerpt
@@ -221,7 +241,6 @@ readable https://en\.wikipedia\.org/wiki/Special:Random \-p title,excerpt
 .RE
 .P
 \fBFetch a web page and read it in W3M:\fR
-.P
 .RS 2
 .nf
 readable https://www\.nytimes\.com/2020/01/18/technology/clearview\-privacy\-facial\-recognition\.html | w3m \-T text/html
@@ -229,7 +248,6 @@ readable https://www\.nytimes\.com/2020/01/18/technology/clearview\-privacy\-fac
 .RE
 .P
 \fBDownload a web page using cURL, parse it and output as JSON:\fR
-.P
 .RS 2
 .nf
 curl https://github\.com/mozilla/readability | readable \-\-base=https://github\.com/mozilla/readability \-\-json
@@ -239,5 +257,8 @@ curl https://github\.com/mozilla/readability | readable \-\-base=https://github\
 .P
 \fBcurl\fR(1), \fBw3m\fR(1), \fBsysexits\fR(3)
 .P
-Source code, license, bug tracker and merge requests may be found on GitLab \fIhttps://gitlab\.com/gardenappl/readability\-cli\fR\|\.
+Source code, license, bug tracker and merge requests may be found on 
+.UR https://gitlab.com/gardenappl/readability-cli
+.I GitLab
+.UE .
 

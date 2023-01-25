@@ -1,20 +1,20 @@
-#!/usr/bin/env -S deno run --allow-net --allow-read --allow-write --allow-env=HTTPS_PROXY,LC_ALL,LC_MESSAGES,LANG,LANGUAGE --no-prompt --no-check --
+#!/usr/bin/env -S deno run --allow-net --allow-read --allow-write --allow-env --no-check --
 
-const version = "2.4.1"
+const version = "2.4.3"
 
-import * as path from "https://deno.land/std@0.130.0/path/mod.ts"
+import * as path from "https://deno.land/std@0.173.0/path/mod.ts"
 
-import { Buffer } from "https://deno.land/std@0.130.0/node/buffer.ts"
-import fs from "https://deno.land/std@0.130.0/node/fs.ts"
-import process from "https://deno.land/std@0.130.0/node/process.ts"
+import { Buffer } from "https://deno.land/std@0.173.0/node/buffer.ts"
+import fs from "https://deno.land/std@0.173.0/node/fs.ts"
+import process from "https://deno.land/std@0.173.0/node/process.ts"
 
-import yargs from "https://deno.land/x/yargs@v17.5.1-deno/deno.ts"
+import yargs from "https://deno.land/x/yargs@v17.6.2-deno/deno.ts"
 import y18n from "https://deno.land/x/y18n@v5.0.8-deno/deno.ts"
 
-import { initParser, DOMParser, DOMParserMimeType, Document, Element } from "https://deno.land/x/deno_dom@v0.1.33-alpha/deno-dom-wasm-noinit.ts"
+import { initParser, DOMParser, DOMParserMimeType, Document, Element } from "https://deno.land/x/deno_dom@v0.1.36-alpha/deno-dom-wasm-noinit.ts"
 import * as ammonia from "https://deno.land/x/ammonia@0.3.1/mod.ts"
 
-import { Readability, isProbablyReaderable } from "https://esm.sh/@mozilla/readability@0.4?no-check"
+import { Readability, isProbablyReaderable } from "https://esm.sh/@mozilla/readability@0.4.2?no-check"
 import UserAgent from "https://esm.sh/user-agents@1.0"
 
 // GNU gettext gives preference to LANGUAGE above all else, but this order is consistent with Yargs:

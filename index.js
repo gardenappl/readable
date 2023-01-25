@@ -88,7 +88,7 @@ function sanitizeHTML(html, window) {
 function sanitizeDOM(document, window) {
 	const createDOMPurify = require("dompurify");
 	const DOMPurify = createDOMPurify(window);
-	DOMPurify.sanitize(document, {IN_PLACE: true, WHOLE_DOCUMENT: true});
+	DOMPurify.sanitize(document.documentElement, {IN_PLACE: true, WHOLE_DOCUMENT: true});
 	return document.documentElement.outerHTML;
 }
 
