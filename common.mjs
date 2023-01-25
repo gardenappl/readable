@@ -131,7 +131,8 @@ export default async function(
 		})
 		.option("completion", {
 			type: "boolean",
-			desc: __`Print script for bash/zsh completion`
+			desc: __`Print script for bash/zsh completion`,
+			hidden: typeof Deno !== "undefined"
 		})
 		.option("base", {
 			alias: 'b',

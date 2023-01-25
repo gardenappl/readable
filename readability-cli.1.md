@@ -74,11 +74,11 @@ The *SOURCE* can be a URL, a file, or '-' for standard input.
 
 `-V`, `--version`
 
-* Print **readability-cli** and Node.js version, then exit.
+* Print **readability-cli** and Node.js/Deno version, then exit.
 
 `--completion`
 
-* Print script for shell completion, and exit. Provides Zsh completion if the current shell is zsh, otherwise provides Bash completion.
+* Print script for shell completion, and exit. Provides Zsh completion if the current shell is zsh, otherwise provides Bash completion. Currently broken when using Deno.
 
 ### Properties
 
