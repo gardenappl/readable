@@ -55,7 +55,7 @@ export default async function(
 
 	const Properties = new Map([
 		["html-title", (article, singleLine, document) =>
-			`<h1>${escapeHTML(Properties.get("title")(article, singleLine, document), document)}</h1>`
+			`<h1>${escapeHTML(Properties.get("title")(article, singleLine, document))}</h1>`
 		],
 		["title", (article, singleLine) => 
 			singleLine ? article.title.replace(/\n+/gm, ' ') : article.title
@@ -398,11 +398,16 @@ export default async function(
 
 
 
-	//Taken from https://stackoverflow.com/a/22706073/5701177
-	function escapeHTML(string, document) {
-	    const p = document.createElement("p");
-	    p.appendChild(document.createTextNode(string));
-	    return p.innerHTML;
+	//Taken from https://stackoverflow.com/a/30970751
+	function escapeHTML(string) {
+		const lookup = {
+			'&': "&amp;",
+			'"': "&quot;",
+			'\'': "&apos;",
+			'<': "&lt;",
+			'>': "&gt;"
+		};
+		return string.replace( /[&"'<>]/g, c => lookup[c] );
 	}
 
 	async function getHTML(document, window) {
@@ -489,7 +494,7 @@ export default async function(
   <link rel="stylesheet" href="${cssHref}" type="text/css">`);
 			}
 			writeStream.write(`
-  <title>${escapeHTML(Properties.get("title")(article, false, document), document)}</title>
+  <title>${escapeHTML(Properties.get("title")(article, false, document))}</title>
 </head>
 `
 			);
@@ -508,12 +513,12 @@ export default async function(
 
 				writeStream.write(`
     <div class="header reader-header reader-show-element">
-      <h1 class="reader-title">${escapeHTML(Properties.get("title")(article, false, document), document)}</h1>`);
+      <h1 class="reader-title">${escapeHTML(Properties.get("title")(article, false, document))}</h1>`);
 
 				const author = Properties.get("byline")(article, false, document);
 				if (author) {
 					writeStream.write(`
-      <div class="credits reader-credits">${escapeHTML(author, document)}</div>`);
+      <div class="credits reader-credits">${escapeHTML(author)}</div>`);
 				}
 
 				writeStream.write(`
@@ -543,7 +548,7 @@ export default async function(
 
 				const author = Properties.get("byline")(article, false, document);
 				if (author) {
-					writeStream.write(`<p><i>${escapeHTML(author, document)}</i></p>`);
+					writeStream.write(`<p><i>${escapeHTML(author)}</i></p>`);
 				}
 				writeStream.write("\n<hr>\n");
 				const html = Properties.get("html-content")(article, false, document);
