@@ -1,6 +1,6 @@
 #!/usr/bin/env -S deno run --allow-net --allow-read --allow-write --allow-env=HTTPS_PROXY,LC_ALL,LC_MESSAGES,LANG,LANGUAGE --no-prompt --no-check --
 
-const version = "2.4.4"
+const version = "2.4.5"
 
 import * as path from "https://deno.land/std@0.201.0/path/mod.ts"
 
