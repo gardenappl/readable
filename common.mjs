@@ -69,7 +69,8 @@ export default async function(
 		["length", article => article.length],
 		["dir", article => article.dir],
 		["text-content", article => article.textContent],
-		["html-content", article => article.content]
+		["html-content", article => article.content],
+		["published-time", article => article.publishedTime]
 	]);
 
 	const LowConfidenceMode = {
